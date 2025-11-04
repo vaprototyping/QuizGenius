@@ -1,0 +1,5 @@
+{
+  "name": "Quiz Genius",
+  "description": "Upload a photo or a PDF page from a schoolbook, extract the text, and instantly generate a quiz. Supports multiple choice, true/false, and open-ended questions.",
+  "requestFramePermissions": []
+}
