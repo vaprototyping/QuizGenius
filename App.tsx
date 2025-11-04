@@ -23,7 +23,7 @@ export default function App() {
     setError(null);
     try {
       const text = await extractTextFromImage(base64Data, mimeType, language);
-      setExtractedText(text);
+      setExtractedText(text ?? '');
       setStep('edit');
     } catch (e) {
       console.error(e);

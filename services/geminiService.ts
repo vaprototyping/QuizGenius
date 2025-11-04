@@ -20,11 +20,18 @@ export const extractTextFromImage = async (base64Data: string, mimeType: string,
   const model = ai.models;
   const imagePart = fileToGenerativePart(base64Data, mimeType);
   
+  const prompt = `You are an expert OCR system specializing in extracting text from educational documents.
+Analyze the provided image of a document. Extract all textual content in the natural reading order.
+- The document language is ${language}.
+- Preserve original paragraphs and list formatting.
+- Do not include text from image captions.
+- Respond ONLY with the clean, extracted text.`;
+
   const result = await model.generateContent({
     model: 'gemini-2.5-flash',
     contents: { 
       parts: [
-        { text: `Extract all text from this document. The text is in ${language}. Respond only with the extracted text.` },
+        { text: prompt },
         imagePart
       ]
     },
