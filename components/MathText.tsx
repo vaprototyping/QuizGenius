@@ -155,11 +155,20 @@ const renderPlainText = (part: string, index: number, katex: any) => {
 const renderMath = (part: string, index: number, katex: any) => {
   if (!part) return null;
 
+const renderMath = (part: string, index: number) => {
+  if (!part) return null;
+
+  const katex = (window as any).katex;
+  if (!katex) {
+    return <span key={index}>{part}</span>;
+  }
+
   const isBlock = part.startsWith('$$') && part.endsWith('$$');
   const isInline = part.startsWith('$') && part.endsWith('$');
 
   if (!isBlock && !isInline) {
     return renderPlainText(part, index, katex);
+    return <span key={index}>{part}</span>;
   }
 
   const latex = part.substring(isBlock ? 2 : 1, part.length - (isBlock ? 2 : 1));
@@ -182,6 +191,7 @@ const renderMath = (part: string, index: number, katex: any) => {
   } catch (error) {
     console.error('Failed to render math text:', error);
     return renderPlainText(part, index, katex);
+    return <span key={index}>{part}</span>;
   }
 };
 
@@ -244,6 +254,16 @@ export const MathText: React.FC<MathTextProps> = ({ text }) => {
   const katex = katexReady ? (window as any).katex : null;
 
   return <>{parts.map((part, index) => renderMath(part, index, katex))}</>;
+};
+
+export default MathText;
+  if (!katexReady) {
+    return <span>{text}</span>;
+  }
+
+  const parts = text.split(MATH_REGEX);
+
+  return <>{parts.map((part, index) => renderMath(part, index))}</>;
 };
 
 export default MathText;

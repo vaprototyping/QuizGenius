@@ -105,7 +105,7 @@ const App: React.FC = () => {
       case 'upload':
         return <FileUpload onFileProcessed={handleFileProcessed} />;
       case 'options':
-        if (extractedText) {
+        if (extractedText !== null) {
           return <QuizOptionsComponent 
             extractedText={extractedText} 
             initialLanguage={language} 
