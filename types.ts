@@ -59,3 +59,10 @@ export interface MathQuizOptions {
 }
 
 export type QuizOptions = TextQuizOptions | MathQuizOptions;
+
+// Add global declaration for KaTeX auto-render function
+declare global {
+  interface Window {
+    renderMathInElement?: (element: HTMLElement, options?: any) => void;
+  }
+}

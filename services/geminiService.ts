@@ -117,7 +117,7 @@ export const generateQuiz = async (
         1. The question itself (as an open-ended problem).
         2. The final correct answer.
         3. A step-by-step explanation showing how to arrive at the answer.
-    - **Crucially, format ALL mathematical equations, variables, and symbols using valid KaTeX-compatible LaTeX syntax. Enclose inline math in single dollar signs (e.g., $x^2$) and block equations in double dollar signs (e.g., $$y = mx + b$$). Ensure all commands are valid; for example, \`\\frac\` must always have two arguments like \`\\frac{numerator}{denominator}\`.**
+    - **Crucially, format ALL mathematical equations, variables, and symbols using valid KaTeX-compatible LaTeX syntax. Enclose inline math in single dollar signs (e.g., $x^2$) and block equations in double dollar signs (e.g., $$y = mx + b$$). For placeholders or fill-in-the-blank boxes, use the \`\\Box\` command. Ensure all commands are valid; for example, \`\\frac\` must always have two arguments like \`\\frac{numerator}{denominator}\`.**
     `;
 
     const mathQuestionSchema = {
