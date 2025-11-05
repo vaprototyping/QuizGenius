@@ -2,6 +2,7 @@ import React from 'react';
 import { Quiz, Question, QuizType, SubjectType } from '../types';
 import { MathText } from './MathText';
 
+
 interface QuizDisplayProps {
   quiz: Quiz;
   userAnswers: Record<number, string>;
