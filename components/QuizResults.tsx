@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Quiz, Question, QuizType, SubjectType } from '../types';
 import { RestartIcon } from './icons/RestartIcon';
 import { EditIcon } from './icons/EditIcon';
+import { MathText } from './MathText';
 
 interface QuizResultsProps {
   quiz: Quiz;
@@ -10,50 +11,6 @@ interface QuizResultsProps {
   onTryAgain: () => void;
   subjectType: SubjectType;
 }
-
-// MathText Component to render LaTeX using KaTeX
-const MathText: React.FC<{ text: string }> = ({ text }) => {
-    // Guard against null/undefined text
-    if (typeof text !== 'string') return null;
-
-    try {
-        // This regex splits the string by LaTeX delimiters ($...$ or $$...$$), keeping the delimiters.
-        const regex = /(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/g;
-        const parts = text.split(regex);
-
-        return (
-            <>
-                {parts.map((part, index) => {
-                    if (!part) return null;
-
-                    if (part.startsWith('$$') && part.endsWith('$$')) {
-                        const latex = part.substring(2, part.length - 2);
-                        // FIX: Access katex from the window object.
-                        const html = (window as any).katex.renderToString(latex, { 
-                            displayMode: true, 
-                            throwOnError: false 
-                        });
-                        return <span key={index} dangerouslySetInnerHTML={{ __html: html }} />;
-                    }
-                    if (part.startsWith('$') && part.endsWith('$')) {
-                        const latex = part.substring(1, part.length - 1);
-                        const html = (window as any).katex.renderToString(latex, { 
-                            displayMode: false, 
-                            throwOnError: false 
-                        });
-                        return <span key={index} dangerouslySetInnerHTML={{ __html: html }} />;
-                    }
-                    // This is a regular text part
-                    return <span key={index}>{part}</span>;
-                })}
-            </>
-        );
-    } catch (e) {
-        console.error("Failed to render math text:", e);
-        // Fallback to raw text on any unexpected error
-        return <span>{text}</span>;
-    }
-};
 
 const ResultCard: React.FC<{
   question: Question;

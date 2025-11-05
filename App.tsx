@@ -27,7 +27,7 @@ const App: React.FC = () => {
     setSubjectType(subject);
     try {
       const text = await extractTextFromImage(base64Data, mimeType, lang, subject);
-      setExtractedText(text);
+      setExtractedText(text ?? '');
       setStep('options');
     } catch (e) {
       console.error(e);
