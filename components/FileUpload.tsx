@@ -1,9 +1,9 @@
 import React, { useState, useCallback, ChangeEvent } from 'react';
-import { Language } from '../types';
+import { Language, SubjectType } from '../types';
 import { UploadIcon } from './icons/UploadIcon';
 
 interface FileUploadProps {
-  onFileProcessed: (base64Data: string, mimeType: string, language: Language) => void;
+  onFileProcessed: (base64Data: string, mimeType: string, language: Language, subject: SubjectType) => void;
 }
 
 const fileToBase64 = (file: File): Promise<string> => {
@@ -54,6 +54,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [language, setLanguage] = useState<Language>(Language.English);
+  const [subjectType, setSubjectType] = useState<SubjectType>(SubjectType.Text);
   const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = useCallback(async (event: ChangeEvent<HTMLInputElement>) => {
@@ -103,12 +104,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
             return;
         }
 
-        onFileProcessed(base64Data, mimeType, language);
+        onFileProcessed(base64Data, mimeType, language, subjectType);
     } catch(e) {
         console.error("File processing failed:", e);
         setError("Could not process the file. Please try again.");
     }
-  }, [file, language, onFileProcessed]);
+  }, [file, language, subjectType, onFileProcessed]);
 
   return (
     <div className="flex flex-col items-center w-full">
@@ -138,10 +139,29 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
       {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
       
       {file && (
-        <div className="mt-6 w-full max-w-md">
-          <p className="text-center truncate text-sm text-slate-500 dark:text-slate-400 mb-4">{file.name}</p>
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-              <div className="w-full">
+        <div className="mt-6 w-full max-w-lg">
+           <p className="text-center truncate text-sm text-slate-500 dark:text-slate-400 mb-4">{file.name}</p>
+           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+             <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Subject Type</label>
+                <div className="flex rounded-md shadow-sm">
+                 {Object.values(SubjectType).map((type, idx) => (
+                    <button
+                        key={type}
+                        // FIX: Cast string from Object.values to the SubjectType enum to satisfy the state setter's type.
+                        onClick={() => setSubjectType(type as SubjectType)}
+                        className={`px-4 py-2 text-sm font-medium border border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:z-10 w-full
+                        ${subjectType === type ? 'bg-indigo-500 text-white' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'}
+                        ${idx === 0 ? 'rounded-l-md' : ''}
+                        ${idx === Object.values(SubjectType).length -1 ? 'rounded-r-md' : ''}
+                        `}
+                    >
+                        {type}
+                    </button>
+                 ))}
+                </div>
+             </div>
+              <div>
                 <label htmlFor="language" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                     Document Language
                 </label>
@@ -156,14 +176,16 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
                     ))}
                 </select>
             </div>
-            <button
-                onClick={handleSubmit}
-                disabled={!file}
-                className="w-full sm:w-auto mt-4 sm:mt-0 self-end whitespace-nowrap px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-slate-400 disabled:cursor-not-allowed"
-            >
-                Extract Text
-            </button>
-          </div>
+           </div>
+            <div className="mt-4">
+                 <button
+                    onClick={handleSubmit}
+                    disabled={!file}
+                    className="w-full whitespace-nowrap px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-slate-400 disabled:cursor-not-allowed"
+                >
+                    Extract Text
+                </button>
+            </div>
         </div>
       )}
     </div>

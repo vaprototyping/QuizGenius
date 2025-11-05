@@ -1,11 +1,57 @@
 import React from 'react';
-import { Quiz, Question, QuizType } from '../types';
+import { Quiz, Question, QuizType, SubjectType } from '../types';
+
+// MathText Component to render LaTeX using KaTeX
+const MathText: React.FC<{ text: string }> = ({ text }) => {
+    // Guard against null/undefined text
+    if (typeof text !== 'string') return null;
+
+    try {
+        // This regex splits the string by LaTeX delimiters ($...$ or $$...$$), keeping the delimiters.
+        const regex = /(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/g;
+        const parts = text.split(regex);
+
+        return (
+            <>
+                {parts.map((part, index) => {
+                    if (!part) return null;
+
+                    if (part.startsWith('$$') && part.endsWith('$$')) {
+                        const latex = part.substring(2, part.length - 2);
+                        // FIX: Access katex from the window object.
+                        const html = (window as any).katex.renderToString(latex, { 
+                            displayMode: true, 
+                            throwOnError: false 
+                        });
+                        return <span key={index} dangerouslySetInnerHTML={{ __html: html }} />;
+                    }
+                    if (part.startsWith('$') && part.endsWith('$')) {
+                        const latex = part.substring(1, part.length - 1);
+                        const html = (window as any).katex.renderToString(latex, { 
+                            displayMode: false, 
+                            throwOnError: false 
+                        });
+                        return <span key={index} dangerouslySetInnerHTML={{ __html: html }} />;
+                    }
+                    // This is a regular text part
+                    return <span key={index}>{part}</span>;
+                })}
+            </>
+        );
+    } catch (e) {
+        console.error("Failed to render math text:", e);
+        // Fallback to raw text on any unexpected error
+        return <span>{text}</span>;
+    }
+};
+
 
 interface QuizDisplayProps {
   quiz: Quiz;
   userAnswers: Record<number, string>;
   setUserAnswers: React.Dispatch<React.SetStateAction<Record<number, string>>>;
   onSubmit: () => void;
+  subjectType: SubjectType;
 }
 
 const QuestionCard: React.FC<{
@@ -13,7 +59,13 @@ const QuestionCard: React.FC<{
   index: number;
   userAnswer: string | undefined;
   onAnswerChange: (questionIndex: number, answer: string) => void;
-}> = ({ question, index, userAnswer, onAnswerChange }) => {
+  subjectType: SubjectType;
+}> = ({ question, index, userAnswer, onAnswerChange, subjectType }) => {
+
+  const renderContent = (content: string) => {
+    return subjectType === SubjectType.Math ? <MathText text={content} /> : <span>{content}</span>;
+  };
+
   const renderAnswerOptions = () => {
     switch (question.type) {
       case QuizType.MultipleChoice:
@@ -29,7 +81,7 @@ const QuestionCard: React.FC<{
                   onChange={(e) => onAnswerChange(index, e.target.value)}
                   className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-slate-300 dark:border-slate-600"
                 />
-                <span className="ml-3 text-slate-700 dark:text-slate-300">{option}</span>
+                <span className="ml-3 text-slate-700 dark:text-slate-300">{renderContent(option)}</span>
               </label>
             ))}
           </div>
@@ -68,16 +120,17 @@ const QuestionCard: React.FC<{
 
   return (
     <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md border border-slate-200 dark:border-slate-700">
-      <p className="font-semibold text-lg text-slate-800 dark:text-slate-200">
-        <span className="text-indigo-500">Q{index + 1}:</span> {question.question}
-      </p>
+      <div className="font-semibold text-lg text-slate-800 dark:text-slate-200">
+        <span className="text-indigo-500 mr-2">Q{index + 1}:</span>
+        {renderContent(question.question)}
+      </div>
       <div className="mt-4">{renderAnswerOptions()}</div>
     </div>
   );
 };
 
 
-export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, setUserAnswers, onSubmit }) => {
+export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, setUserAnswers, onSubmit, subjectType }) => {
   const handleAnswerChange = (questionIndex: number, answer: string) => {
     setUserAnswers((prev) => ({ ...prev, [questionIndex]: answer }));
   };
@@ -103,6 +156,7 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
             index={index}
             userAnswer={userAnswers[index]}
             onAnswerChange={handleAnswerChange}
+            subjectType={subjectType}
           />
         ))}
       </div>

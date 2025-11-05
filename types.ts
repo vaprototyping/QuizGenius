@@ -1,13 +1,33 @@
+export enum Language {
+  English = 'English',
+  Spanish = 'Spanish',
+  French = 'French',
+  German = 'German',
+  Chinese = 'Chinese',
+  Japanese = 'Japanese',
+  Korean = 'Korean',
+}
+
+export enum SubjectType {
+  Text = 'Text',
+  Math = 'Math',
+}
+
 export enum QuizType {
   MultipleChoice = 'Multiple Choice',
   TrueFalse = 'True/False',
-  Open = 'Open Questions',
+  Open = 'Open Ended',
 }
 
-export enum Language {
-  English = 'English',
-  Dutch = 'Dutch',
-  Italian = 'Italian',
+export enum MathQuizType {
+  SimilarExercises = 'Similar Exercises',
+  ApplicationProblems = 'Application Problems',
+}
+
+export enum Difficulty {
+  Easy = 'Easy',
+  Medium = 'Medium',
+  Hard = 'Hard',
 }
 
 export interface Question {
@@ -23,5 +43,19 @@ export interface Quiz {
   questions: Question[];
 }
 
-// Global declaration for pdfjsLib from CDN
-declare const pdfjsLib: any;
+export interface TextQuizOptions {
+  subjectType: SubjectType.Text;
+  numberOfQuestions: number;
+  quizType: QuizType;
+  language: Language;
+}
+
+export interface MathQuizOptions {
+  subjectType: SubjectType.Math;
+  numberOfQuestions: number;
+  mathQuizType: MathQuizType;
+  difficulty: Difficulty;
+  language: Language;
+}
+
+export type QuizOptions = TextQuizOptions | MathQuizOptions;

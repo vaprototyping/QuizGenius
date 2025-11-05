@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Quiz, Question, QuizType } from '../types';
+import { Quiz, Question, QuizType, SubjectType } from '../types';
 import { RestartIcon } from './icons/RestartIcon';
 import { EditIcon } from './icons/EditIcon';
 
@@ -8,43 +8,97 @@ interface QuizResultsProps {
   userAnswers: Record<number, string>;
   onRestart: () => void;
   onTryAgain: () => void;
+  subjectType: SubjectType;
 }
+
+// MathText Component to render LaTeX using KaTeX
+const MathText: React.FC<{ text: string }> = ({ text }) => {
+    // Guard against null/undefined text
+    if (typeof text !== 'string') return null;
+
+    try {
+        // This regex splits the string by LaTeX delimiters ($...$ or $$...$$), keeping the delimiters.
+        const regex = /(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/g;
+        const parts = text.split(regex);
+
+        return (
+            <>
+                {parts.map((part, index) => {
+                    if (!part) return null;
+
+                    if (part.startsWith('$$') && part.endsWith('$$')) {
+                        const latex = part.substring(2, part.length - 2);
+                        // FIX: Access katex from the window object.
+                        const html = (window as any).katex.renderToString(latex, { 
+                            displayMode: true, 
+                            throwOnError: false 
+                        });
+                        return <span key={index} dangerouslySetInnerHTML={{ __html: html }} />;
+                    }
+                    if (part.startsWith('$') && part.endsWith('$')) {
+                        const latex = part.substring(1, part.length - 1);
+                        const html = (window as any).katex.renderToString(latex, { 
+                            displayMode: false, 
+                            throwOnError: false 
+                        });
+                        return <span key={index} dangerouslySetInnerHTML={{ __html: html }} />;
+                    }
+                    // This is a regular text part
+                    return <span key={index}>{part}</span>;
+                })}
+            </>
+        );
+    } catch (e) {
+        console.error("Failed to render math text:", e);
+        // Fallback to raw text on any unexpected error
+        return <span>{text}</span>;
+    }
+};
 
 const ResultCard: React.FC<{
   question: Question;
   index: number;
   userAnswer: string | undefined;
   isCorrect: boolean;
-}> = ({ question, index, userAnswer, isCorrect }) => {
+  subjectType: SubjectType;
+}> = ({ question, index, userAnswer, isCorrect, subjectType }) => {
   const baseClasses = "p-6 rounded-xl border-2";
   const statusClasses = isCorrect
     ? "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-700"
     : "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-700";
+    
+  const renderContent = (content: string) => {
+    if (typeof content !== 'string') return null;
+    return subjectType === SubjectType.Math ? <MathText text={content} /> : <span>{content}</span>;
+  };
 
   return (
     <div className={`${baseClasses} ${statusClasses}`}>
-      <p className="font-semibold text-lg text-slate-800 dark:text-slate-200">
-        <span className="text-slate-500 dark:text-slate-400">Q{index + 1}:</span> {question.question}
-      </p>
+      <div className="font-semibold text-lg text-slate-800 dark:text-slate-200">
+        <span className="text-slate-500 dark:text-slate-400 mr-2">Q{index + 1}:</span>
+        {renderContent(question.question)}
+      </div>
       <div className="mt-4 text-sm space-y-3">
         {!isCorrect && userAnswer && (
-          <p className="text-red-700 dark:text-red-400">
-            <span className="font-bold">Your answer:</span> {userAnswer}
-          </p>
+          <div className="text-red-700 dark:text-red-400 flex items-start">
+            <span className="font-bold mr-2">Your answer:</span> 
+            {renderContent(userAnswer)}
+          </div>
         )}
-        <p className="text-green-700 dark:text-green-400">
-          <span className="font-bold">Correct answer:</span> {question.answer}
-        </p>
+        <div className="text-green-700 dark:text-green-400 flex items-start">
+          <span className="font-bold mr-2">Correct answer:</span>
+          {renderContent(question.answer)}
+        </div>
         <div className="pt-2 text-slate-600 dark:text-slate-300">
           <p className="font-bold">Explanation:</p>
-          <p>{question.explanation}</p>
+          {renderContent(question.explanation)}
         </div>
       </div>
     </div>
   );
 };
 
-export const QuizResults: React.FC<QuizResultsProps> = ({ quiz, userAnswers, onRestart, onTryAgain }) => {
+export const QuizResults: React.FC<QuizResultsProps> = ({ quiz, userAnswers, onRestart, onTryAgain, subjectType }) => {
   const sanitizedQuestions = React.useMemo(() => {
     return (quiz?.questions || []).filter(
       (q): q is Question =>
@@ -54,6 +108,8 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ quiz, userAnswers, onR
 
   const { score, total, percentage, correctAnswers } = useMemo(() => {
     const correctAnswers = sanitizedQuestions.map((q, index) => {
+        // For math, we should ignore whitespace and maybe some formatting.
+        // For simplicity, we'll stick to a trimmed, case-insensitive comparison for now.
         const userAnswer = userAnswers[index] ? String(userAnswers[index]).trim() : '';
         const correctAnswer = String(q.answer).trim();
 
@@ -118,6 +174,7 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ quiz, userAnswers, onR
             index={index}
             userAnswer={userAnswers[index]}
             isCorrect={correctAnswers[index]}
+            subjectType={subjectType}
           />
         ))}
       </div>

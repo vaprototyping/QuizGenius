@@ -1,148 +1,171 @@
 import React, { useState, useCallback } from 'react';
-import { QuizType, Language, Quiz } from './types';
 import { FileUpload } from './components/FileUpload';
-import { QuizOptions } from './components/QuizOptions';
+import { QuizOptions as QuizOptionsComponent } from './components/QuizOptions';
 import { QuizDisplay } from './components/QuizDisplay';
 import { QuizResults } from './components/QuizResults';
 import { Spinner } from './components/Spinner';
 import { extractTextFromImage, generateQuiz } from './services/geminiService';
+import { Quiz, Language, SubjectType, QuizOptions } from './types';
+import { SparklesIcon } from './components/icons/SparklesIcon';
 
-type AppStep = 'upload' | 'edit' | 'quiz' | 'results';
-
-export default function App() {
-  const [step, setStep] = useState<AppStep>('upload');
-  const [extractedText, setExtractedText] = useState<string>('');
-  const [quizData, setQuizData] = useState<Quiz | null>(null);
-  const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+const App: React.FC = () => {
+  const [step, setStep] = useState<'upload' | 'options' | 'quiz' | 'results' | 'loading'>('upload');
   const [error, setError] = useState<string | null>(null);
-  const [quizTitle, setQuizTitle] = useState<string>('');
   
-  const handleFileProcessed = useCallback(async (base64Data: string, mimeType: string, language: Language) => {
-    setIsLoading(true);
+  const [extractedText, setExtractedText] = useState<string | null>(null);
+  const [quiz, setQuiz] = useState<Quiz | null>(null);
+  const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
+  const [currentQuizOptions, setCurrentQuizOptions] = useState<QuizOptions | null>(null);
+  
+  const [language, setLanguage] = useState<Language>(Language.English);
+  const [subjectType, setSubjectType] = useState<SubjectType>(SubjectType.Text);
+
+  const handleFileProcessed = async (base64Data: string, mimeType: string, lang: Language, subject: SubjectType) => {
+    setStep('loading');
     setError(null);
+    setLanguage(lang);
+    setSubjectType(subject);
     try {
-      const text = await extractTextFromImage(base64Data, mimeType, language);
-      setExtractedText(text ?? '');
-      setStep('edit');
+      const text = await extractTextFromImage(base64Data, mimeType, lang, subject);
+      setExtractedText(text);
+      setStep('options');
     } catch (e) {
       console.error(e);
-      setError('Failed to extract text from the file. Please try another file.');
-    } finally {
-      setIsLoading(false);
+      setError(e instanceof Error ? e.message : 'An unknown error occurred during text extraction.');
+      setStep('upload');
     }
-  }, []);
+  };
 
-  const handleQuizGeneration = useCallback(async (type: QuizType, count: number) => {
-    setIsLoading(true);
+  const handleQuizGenerate = async (options: QuizOptions) => {
+    if (!extractedText) return;
+    setStep('loading');
     setError(null);
+    setCurrentQuizOptions(options);
     try {
-      const generatedQuiz = await generateQuiz(extractedText, type, count);
-      setQuizData(generatedQuiz);
-      setQuizTitle(generatedQuiz.title);
-      setUserAnswers({});
+      const quizData = await generateQuiz(extractedText, options);
+      setQuiz(quizData);
+      setUserAnswers({}); // Reset answers for new quiz
       setStep('quiz');
     } catch (e) {
       console.error(e);
-      setError('Failed to generate quiz. The content might be too short or the AI service is currently unavailable.');
-    } finally {
-      setIsLoading(false);
+      setError(e instanceof Error ? e.message : 'An unknown error occurred during quiz generation.');
+      setStep('options'); // Go back to options on error
     }
-  }, [extractedText]);
+  };
 
-  const handleAnswersSubmit = useCallback(() => {
+  const handleSubmitQuiz = (answers: Record<number, string>) => {
+    setUserAnswers(answers);
     setStep('results');
-  }, []);
-  
-  const handleRestart = useCallback(() => {
+  };
+
+  const handleRestart = () => {
     setStep('upload');
-    setExtractedText('');
-    setQuizData(null);
-    setUserAnswers({});
     setError(null);
-    setQuizTitle('');
-  }, []);
+    setExtractedText(null);
+    setQuiz(null);
+    setUserAnswers({});
+    setCurrentQuizOptions(null);
+  };
+  
+  const handleTryAgain = () => {
+      if (extractedText && currentQuizOptions) {
+          handleQuizGenerate(currentQuizOptions);
+      } else {
+          // Fallback if something is wrong with the state
+          handleRestart();
+      }
+  }
 
-  const handleBackToEdit = useCallback(() => {
-    setStep('edit');
-    setQuizData(null);
-  }, []);
-
-  const renderStep = () => {
-    if (isLoading) {
+  const renderContent = () => {
+    if (step === 'loading') {
       return (
-        <div className="flex flex-col items-center justify-center text-center p-8">
+        <div className="text-center">
           <Spinner />
-          <p className="mt-4 text-lg text-slate-600 dark:text-slate-300">
-            {step === 'upload' ? 'Analyzing your document...' : 'Generating your quiz...'}
-          </p>
-          <p className="text-sm text-slate-500 dark:text-slate-400">This might take a moment.</p>
+          <p className="mt-4 text-slate-500 dark:text-slate-400">AI is thinking...</p>
         </div>
       );
+    }
+
+    if (error) {
+        return (
+            <div className="text-center max-w-xl mx-auto">
+                <h2 className="text-2xl font-bold text-red-600 dark:text-red-400">An Error Occurred</h2>
+                <p className="mt-2 text-slate-600 dark:text-slate-300 bg-red-50 dark:bg-red-900/20 p-4 rounded-md">{error}</p>
+                <button
+                    onClick={handleRestart}
+                    className="mt-6 px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                >
+                    Start Over
+                </button>
+            </div>
+        )
     }
 
     switch (step) {
       case 'upload':
         return <FileUpload onFileProcessed={handleFileProcessed} />;
-      case 'edit':
-        return (
-          <QuizOptions
-            extractedText={extractedText}
-            onTextChange={setExtractedText}
-            onGenerateQuiz={handleQuizGeneration}
-            onRestart={handleRestart}
-          />
-        );
+      case 'options':
+        if (extractedText) {
+          return <QuizOptionsComponent 
+            extractedText={extractedText} 
+            initialLanguage={language} 
+            initialSubjectType={subjectType}
+            onQuizGenerate={handleQuizGenerate} 
+            onBack={handleRestart}
+          />;
+        }
+        // Fallback, should not happen, reset state
+        handleRestart();
+        return null;
       case 'quiz':
-        return quizData ? (
-          <QuizDisplay
-            quiz={quizData}
+        if (quiz) {
+          return <QuizDisplay 
+            quiz={quiz} 
             userAnswers={userAnswers}
             setUserAnswers={setUserAnswers}
-            onSubmit={handleAnswersSubmit}
-          />
-        ) : null;
+            onSubmit={() => handleSubmitQuiz(userAnswers)}
+            subjectType={subjectType}
+          />;
+        }
+        return <p>Something went wrong.</p>;
       case 'results':
-        return quizData ? (
-          <QuizResults
-            quiz={quizData}
-            userAnswers={userAnswers}
+        if (quiz) {
+          return <QuizResults 
+            quiz={quiz} 
+            userAnswers={userAnswers} 
             onRestart={handleRestart}
-            onTryAgain={handleBackToEdit}
-          />
-        ) : null;
+            onTryAgain={handleTryAgain}
+            subjectType={subjectType}
+          />;
+        }
+        return <p>Something went wrong.</p>;
       default:
-        return null;
+        return <FileUpload onFileProcessed={handleFileProcessed} />;
     }
   };
 
   return (
-    <main className="min-h-screen w-full bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 font-sans">
-       <div className="w-full max-w-4xl mx-auto">
-        <header className="text-center mb-8">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-600">
-            Quiz Genius
+    <div className="bg-slate-50 dark:bg-slate-900 min-h-screen text-slate-900 dark:text-slate-100 font-sans">
+      <main className="container mx-auto px-4 py-12">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-800 dark:text-slate-200 flex items-center justify-center gap-3">
+            <SparklesIcon className="w-8 h-8 text-indigo-500" />
+            Quiz Wiz
           </h1>
-          <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">
-            Create quizzes from your schoolbook in seconds.
+          <p className="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+            Instantly generate quizzes from your documents or images using AI.
           </p>
-        </header>
-        
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden transition-all duration-500">
-           <div className="p-6 sm:p-8 lg:p-10">
-            {error && (
-              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md" role="alert">
-                <p className="font-bold">An Error Occurred</p>
-                <p>{error}</p>
-              </div>
-            )}
-            {renderStep()}
-          </div>
         </div>
-        <footer className="text-center mt-8 text-slate-500 dark:text-slate-400 text-sm">
-            <p>Powered by React, Tailwind CSS, and Gemini API.</p>
-        </footer>
-       </div>
-    </main>
+        
+        <div className="max-w-4xl mx-auto flex justify-center">
+          {renderContent()}
+        </div>
+      </main>
+      <footer className="text-center py-6 text-sm text-slate-500 dark:text-slate-400">
+        <p>Powered by Google Gemini</p>
+      </footer>
+    </div>
   );
-}
+};
+
+export default App;
