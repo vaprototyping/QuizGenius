@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react';
-import { Quiz, Question, QuizType, SubjectType } from '../types';
+import React, { useMemo, useEffect } from 'react';
+import { Quiz, Question, SubjectType } from '../types';
 import { RestartIcon } from './icons/RestartIcon';
 import { EditIcon } from './icons/EditIcon';
-import { MathText } from './MathText';
+import MathText from './MathText';
 
 interface QuizResultsProps {
   quiz: Quiz;
@@ -12,149 +12,128 @@ interface QuizResultsProps {
   subjectType: SubjectType;
 }
 
-const ResultCard: React.FC<{
-  question: Question;
-  index: number;
-  userAnswer: string | undefined;
-  isCorrect: boolean;
-  subjectType: SubjectType;
-}> = ({ question, index, userAnswer, isCorrect, subjectType }) => {
-  const baseClasses = "p-6 rounded-xl border-2";
-  const statusClasses = isCorrect
-    ? "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-700"
-    : "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-700";
-    
-  const renderContent = (content: string) => {
-    if (typeof content !== 'string') return null;
-    return subjectType === SubjectType.Math ? <MathText text={content} /> : <span>{content}</span>;
-  };
-
-  return (
-    <div className={`${baseClasses} ${statusClasses}`}>
-      <div className="font-semibold text-lg text-slate-800 dark:text-slate-200">
-        <span className="text-slate-500 dark:text-slate-400 mr-2">Q{index + 1}:</span>
-        {renderContent(question.question)}
-      </div>
-      <div className="mt-4 text-sm space-y-3">
-        {!isCorrect && userAnswer && (
-          <div className="text-red-700 dark:text-red-400 flex items-start">
-            <span className="font-bold mr-2">Your answer:</span> 
-            {renderContent(userAnswer)}
-          </div>
-        )}
-        <div className="text-green-700 dark:text-green-400 flex items-start">
-          <span className="font-bold mr-2">Correct answer:</span>
-          {renderContent(question.answer)}
-        </div>
-        <div className="pt-2 text-slate-600 dark:text-slate-300">
-          <p className="font-bold">Explanation:</p>
-          {renderContent(question.explanation)}
-        </div>
-      </div>
-    </div>
-  );
+const getScoreColor = (score: number) => {
+  if (score >= 80) return 'text-green-500';
+  if (score >= 50) return 'text-yellow-500';
+  return 'text-red-500';
 };
 
-export const QuizResults: React.FC<QuizResultsProps> = ({ quiz, userAnswers, onRestart, onTryAgain, subjectType }) => {
-  const sanitizedQuestions = React.useMemo(() => {
-    return (quiz?.questions || []).filter(
-      (q): q is Question =>
-        q && typeof q.question === 'string' && typeof q.answer === 'string'
-    );
-  }, [quiz]);
+/**
+ * A robust function to check if the user's answer is correct.
+ * It handles plain text and math answers by stripping LaTeX delimiters before comparison.
+ */
+const isAnswerCorrect = (userAnswer: string | undefined, correctAnswer: string, subjectType: SubjectType): boolean => {
+    if (userAnswer === undefined) {
+        return false;
+    }
 
-  const { score, total, percentage, correctAnswers } = useMemo(() => {
-    const correctAnswers = sanitizedQuestions.map((q, index) => {
-        // For math, we should ignore whitespace and maybe some formatting.
-        // For simplicity, we'll stick to a trimmed, case-insensitive comparison for now.
-        const userAnswer = userAnswers[index] ? String(userAnswers[index]).trim() : '';
-        const correctAnswer = String(q.answer).trim();
+    const userAnswerClean = userAnswer.trim();
+    let correctAnswerClean = correctAnswer.trim();
 
-        if (q.type === QuizType.TrueFalse) {
-            return userAnswer.toLowerCase() === correctAnswer.toLowerCase();
+    // For math, strip delimiters like '$...$' for a fair comparison
+    if (subjectType === SubjectType.Math) {
+        if (correctAnswerClean.startsWith('$') && correctAnswerClean.endsWith('$')) {
+            correctAnswerClean = correctAnswerClean.substring(1, correctAnswerClean.length - 1).trim();
         }
-        return userAnswer.toLowerCase() === correctAnswer.toLowerCase();
-    });
-
-    const score = correctAnswers.filter(Boolean).length;
-    const total = sanitizedQuestions.length;
-    const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
+    }
     
-    return { score, total, percentage, correctAnswers };
-  }, [sanitizedQuestions, userAnswers]);
-  
-  const scoreColor = percentage >= 75 ? 'text-green-500' : percentage >= 40 ? 'text-yellow-500' : 'text-red-500';
+    // Final comparison is case-insensitive
+    return userAnswerClean.toLowerCase() === correctAnswerClean.toLowerCase();
+};
 
-  const quizTextContent = useMemo(() => {
-    let text = `${quiz.title || 'Quiz'}\n\n`;
-    sanitizedQuestions.forEach((q, i) => {
-      text += `Q${i + 1}: ${q.question}\n`;
-      if (q.type === QuizType.MultipleChoice && q.options) {
-        q.options.forEach(opt => text += `- ${opt}\n`);
+
+export const QuizResults: React.FC<QuizResultsProps> = ({ quiz, userAnswers, onRestart, onTryAgain, subjectType }) => {
+
+  useEffect(() => {
+    // When the component mounts, try to render any math equations in the content.
+    if (subjectType === SubjectType.Math && window.renderMathInElement) {
+      const element = document.getElementById('quiz-results');
+      if (element) {
+        window.renderMathInElement(element);
       }
-      text += `Answer: ${q.answer}\n`;
-      text += `Explanation: ${q.explanation || 'N/A'}\n\n`;
-    });
-    return text;
-  }, [quiz.title, sanitizedQuestions]);
+    }
+  }, [quiz, subjectType]);
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(quizTextContent);
+  const { score, correctAnswers } = useMemo(() => {
+    let correct = 0;
+    quiz.questions.forEach((q, index) => {
+        if (isAnswerCorrect(userAnswers[index], q.answer, subjectType)) {
+            correct++;
+        }
+    });
+    const scorePercentage = quiz.questions.length > 0 ? (correct / quiz.questions.length) * 100 : 0;
+    return { score: Math.round(scorePercentage), correctAnswers: correct };
+  }, [quiz, userAnswers, subjectType]);
+
+  const renderResult = (question: Question, index: number) => {
+    const userAnswer = userAnswers[index] || 'No Answer';
+    const isCorrect = isAnswerCorrect(userAnswer, question.answer, subjectType);
+    
+    const resultColor = isCorrect ? 'border-green-500 dark:border-green-400' : 'border-red-500 dark:border-red-400';
+    const resultBg = isCorrect ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20';
+    
+    return (
+      <div key={index} className={`mb-6 p-5 rounded-xl border-l-4 ${resultColor} ${resultBg}`}>
+        <p className="font-semibold text-slate-800 dark:text-slate-200 mb-3">
+          <span className="font-bold mr-2">{index + 1}.</span>
+          {subjectType === SubjectType.Math ? <MathText text={question.question} /> : question.question}
+        </p>
+        
+        <div className="text-sm space-y-3 pl-6">
+            <div className={`p-3 rounded-md ${isCorrect ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
+                <p className="font-medium text-slate-600 dark:text-slate-400">Your Answer:</p>
+                <p className="text-slate-800 dark:text-slate-200">
+                    {subjectType === SubjectType.Math ? <MathText text={userAnswer} /> : userAnswer}
+                </p>
+            </div>
+            {!isCorrect && (
+                <div className="p-3 rounded-md bg-green-100 dark:bg-green-900/30">
+                    <p className="font-medium text-slate-600 dark:text-slate-400">Correct Answer:</p>
+                    <p className="text-slate-800 dark:text-slate-200">
+                      {subjectType === SubjectType.Math ? <MathText text={question.answer} /> : question.answer}
+                    </p>
+                </div>
+            )}
+            <div className="pt-2">
+                <p className="font-medium text-slate-600 dark:text-slate-400">Explanation:</p>
+                <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
+                   {subjectType === SubjectType.Math ? <MathText text={question.explanation} /> : question.explanation}
+                </p>
+            </div>
+        </div>
+      </div>
+    );
   };
   
-  const downloadAsText = () => {
-    const blob = new Blob([quizTextContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${(quiz.title || 'quiz').replace(/\s/g, '_')}_quiz.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
   return (
-    <div className="w-full text-center">
-      <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-200">Results for "{quiz.title || 'Your Quiz'}"</h2>
-      <div className="my-8">
-        <p className="text-lg text-slate-600 dark:text-slate-400">You scored</p>
-        <p className={`text-7xl font-extrabold ${scoreColor}`}>{percentage}%</p>
-        <p className="text-lg text-slate-600 dark:text-slate-400">({score} out of {total} correct)</p>
+    <div className="w-full max-w-3xl mx-auto" id="quiz-results">
+      <div className="text-center mb-10">
+        <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-200">Quiz Results</h2>
+        <div className="mt-4">
+            <p className="text-lg text-slate-600 dark:text-slate-400">You scored</p>
+            <p className={`text-6xl font-extrabold ${getScoreColor(score)}`}>{score}%</p>
+            <p className="text-lg text-slate-600 dark:text-slate-400">({correctAnswers} out of {quiz.questions.length} correct)</p>
+        </div>
       </div>
 
-      <div className="text-left space-y-6">
-        {sanitizedQuestions.map((q, index) => (
-          <ResultCard
-            key={index}
-            question={q}
-            index={index}
-            userAnswer={userAnswers[index]}
-            isCorrect={correctAnswers[index]}
-            subjectType={subjectType}
-          />
-        ))}
-      </div>
-      
-      <div className="mt-8 flex justify-center gap-2">
-        <button onClick={copyToClipboard} className="px-4 py-2 border rounded-md text-sm">Copy Quiz</button>
-        <button onClick={downloadAsText} className="px-4 py-2 border rounded-md text-sm">Download (.txt)</button>
+      <div>
+        {quiz.questions.map(renderResult)}
       </div>
 
-      <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
-        <button
-          onClick={onRestart}
-          className="w-full sm:w-auto flex items-center justify-center px-6 py-2 border border-slate-300 dark:border-slate-600 text-sm font-medium rounded-md text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          <RestartIcon className="w-5 h-5 mr-2" />
-          Create New Quiz
-        </button>
+      <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
         <button
           onClick={onTryAgain}
-          className="w-full sm:w-auto flex items-center justify-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="w-full sm:w-auto flex items-center justify-center px-6 py-3 border border-slate-300 dark:border-slate-600 text-base font-medium rounded-md text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           <EditIcon className="w-5 h-5 mr-2" />
-          Generate a Different Quiz
+          Generate New Quiz
+        </button>
+        <button
+          onClick={onRestart}
+          className="w-full sm:w-auto flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          <RestartIcon className="w-5 h-5 mr-2" />
+          Start Over
         </button>
       </div>
     </div>
