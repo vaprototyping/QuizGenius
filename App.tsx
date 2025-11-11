@@ -116,6 +116,7 @@ const App: React.FC = () => {
   const handleSubmitQuiz = (answers: Record<number, string>) => {
     setUserAnswers(answers);
     setStep('results');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleRestart = () => {
@@ -208,7 +209,7 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-slate-50 dark:bg-slate-900 min-h-screen text-slate-900 dark:text-slate-100 font-sans relative">
-      <header className="absolute top-6 right-6 z-10">
+      <header className="absolute top-4 right-4 z-10">
         <LanguageSelector />
       </header>
       <main className="container mx-auto px-4 py-12">
