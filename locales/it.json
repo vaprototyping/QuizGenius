@@ -1,0 +1,87 @@
+{
+  "app": {
+    "description": "Genera istantaneamente quiz dai tuoi documenti o immagini usando l'IA.",
+    "poweredBy": "Realizzato con Google Gemini",
+    "errorTitle": "Si è verificato un errore",
+    "errorGeneric": "Qualcosa è andato storto.",
+    "startOver": "Ricomincia",
+    "submit": "Invia Quiz"
+  },
+  "loading": {
+    "thinking": "L'IA sta pensando...",
+    "analyzing": "Analisi del documento...",
+    "extracting": "Estrazione del testo in corso...",
+    "finalizing": "Finalizzazione dell'estrazione...",
+    "extractionComplete": "Estrazione completata!",
+    "understanding": "Comprensione del contenuto...",
+    "crafting": "Creazione di domande pertinenti...",
+    "developing": "Sviluppo delle chiavi di risposta...",
+    "assembling": "Assemblaggio del tuo quiz...",
+    "quizGenerated": "Quiz generato!"
+  },
+  "errors": {
+    "unknownExtraction": "Si è verificato un errore sconosciuto durante l'estrazione del testo.",
+    "unknownQuizGeneration": "Si è verificato un errore sconosciuto durante la generazione del quiz.",
+    "unsupportedFile": "Tipo di file non supportato. Carica un'immagine o un PDF a pagina singola.",
+    "pdfRender": "Impossibile visualizzare il PDF. Potrebbe essere corrotto o non supportato.",
+    "fileProcess": "Impossibile elaborare il file. Riprova."
+  },
+  "fileUpload": {
+    "renderingPdf": "Rendering anteprima PDF...",
+    "clickToUpload": "Clicca per caricare",
+    "dragAndDrop": "o trascina e rilascia",
+    "fileTypes": "Immagine o PDF a pagina singola",
+    "subjectType": "Tipo di materia",
+    "documentLanguage": "Lingua del documento",
+    "extractText": "Estrai testo"
+  },
+  "quizOptions": {
+    "title": "Personalizza il tuo quiz",
+    "description": "Abbiamo analizzato il tuo documento. Ora, impostiamo il quiz.",
+    "preview": "Anteprima del contenuto estratto",
+    "numQuestions": "Numero di domande",
+    "questionType": "Tipo di domanda",
+    "exerciseStyle": "Stile degli esercizi",
+    "difficulty": "Difficoltà",
+    "back": "Indietro",
+    "generate": "Genera Quiz"
+  },
+  "quizDisplay": {
+    "description": "Rispondi alle seguenti domande al meglio delle tue capacità.",
+    "placeholder": "La tua risposta qui...",
+    "allAnswered": "Per favore, rispondi a tutte le domande prima di inviare."
+  },
+  "quizResults": {
+    "title": "Risultati del Quiz",
+    "youScored": "Hai ottenuto",
+    "scoreOutOf": "({correct} su {total} corrette)",
+    "yourAnswer": "La tua risposta:",
+    "correctAnswer": "Risposta corretta:",
+    "explanation": "Spiegazione:",
+    "noAnswer": "Nessuna risposta",
+    "generateNew": "Genera nuovo quiz"
+  },
+  "languageSelector": {
+    "label": "Lingua UI"
+  },
+  "enums": {
+    "subjectType": {
+      "Text": "Testo",
+      "Math": "Matematica"
+    },
+    "quizType": {
+      "MultipleChoice": "Scelta Multipla",
+      "TrueFalse": "Vero/Falso",
+      "Open": "Risposta Aperta"
+    },
+    "mathQuizType": {
+      "SimilarExercises": "Esercizi Simili",
+      "ApplicationProblems": "Problemi Applicativi"
+    },
+    "difficulty": {
+      "Easy": "Facile",
+      "Medium": "Medio",
+      "Hard": "Difficile"
+    }
+  }
+}

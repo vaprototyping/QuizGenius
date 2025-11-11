@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Quiz, Question, QuizType, SubjectType } from '../types';
 import MathText from './MathText';
+import { useI18n } from '../context/i18n';
 
 interface QuizDisplayProps {
   quiz: Quiz;
@@ -11,9 +12,9 @@ interface QuizDisplayProps {
 }
 
 export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, setUserAnswers, onSubmit, subjectType }) => {
+  const { t } = useI18n();
 
   useEffect(() => {
-    // When the component mounts, try to render any math equations in the content.
     if (subjectType === SubjectType.Math && window.renderMathInElement) {
       const element = document.getElementById('quiz-display');
       if (element) {
@@ -85,7 +86,7 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
                 onChange={(e) => handleAnswerChange(index, e.target.value)}
                 rows={4}
                 className="mt-1 block w-full p-3 text-base border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                placeholder="Your answer here..."
+                placeholder={t('quizDisplay.placeholder')}
               />
             )}
           </div>
@@ -94,13 +95,13 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
     );
   };
   
-  const allQuestionsAnswered = Object.keys(userAnswers).length === quiz.questions.length && Object.values(userAnswers).every(ans => ans.trim() !== '');
+  const allQuestionsAnswered = Object.keys(userAnswers).length === quiz.questions.length && Object.values(userAnswers).every(ans => typeof ans === 'string' && ans.trim() !== '');
 
   return (
     <div className="w-full max-w-3xl mx-auto" id="quiz-display">
       <h2 className="text-3xl font-bold text-center mb-2 text-slate-800 dark:text-slate-200">{quiz.title}</h2>
       <p className="text-center text-slate-500 dark:text-slate-400 mb-8">
-        Answer the following questions to the best of your ability.
+        {t('quizDisplay.description')}
       </p>
 
       <div>{quiz.questions.map(renderQuestion)}</div>
@@ -111,9 +112,9 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
           disabled={!allQuestionsAnswered}
           className="w-full sm:w-auto px-12 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed"
         >
-          Submit Quiz
+          {t('app.submit')}
         </button>
-        {!allQuestionsAnswered && <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Please answer all questions before submitting.</p>}
+        {!allQuestionsAnswered && <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{t('quizDisplay.allAnswered')}</p>}
       </div>
     </div>
   );

@@ -1,0 +1,87 @@
+{
+  "app": {
+    "description": "Genereer direct quizzen van uw documenten of afbeeldingen met behulp van AI.",
+    "poweredBy": "Mogelijk gemaakt door Google Gemini",
+    "errorTitle": "Er is een fout opgetreden",
+    "errorGeneric": "Er is iets misgegaan.",
+    "startOver": "Opnieuw beginnen",
+    "submit": "Quiz inleveren"
+  },
+  "loading": {
+    "thinking": "AI is aan het denken...",
+    "analyzing": "Document analyseren...",
+    "extracting": "Tekst extraheren...",
+    "finalizing": "Extractie voltooien...",
+    "extractionComplete": "Extractie voltooid!",
+    "understanding": "Inhoud begrijpen...",
+    "crafting": "Inzichtelijke vragen maken...",
+    "developing": "Antwoordsleutels ontwikkelen...",
+    "assembling": "Uw quiz samenstellen...",
+    "quizGenerated": "Quiz gegenereerd!"
+  },
+  "errors": {
+    "unknownExtraction": "Er is een onbekende fout opgetreden tijdens het extraheren van de tekst.",
+    "unknownQuizGeneration": "Er is een onbekende fout opgetreden tijdens het genereren van de quiz.",
+    "unsupportedFile": "Niet-ondersteund bestandstype. Upload een afbeelding of een PDF van één pagina.",
+    "pdfRender": "Kon PDF niet weergeven. Het is mogelijk beschadigd of niet-ondersteund.",
+    "fileProcess": "Kon het bestand niet verwerken. Probeer het opnieuw."
+  },
+  "fileUpload": {
+    "renderingPdf": "PDF-voorbeeld renderen...",
+    "clickToUpload": "Klik om te uploaden",
+    "dragAndDrop": "of sleep het hierheen",
+    "fileTypes": "Afbeelding of PDF van één pagina",
+    "subjectType": "Onderwerptype",
+    "documentLanguage": "Taal van het document",
+    "extractText": "Tekst extraheren"
+  },
+  "quizOptions": {
+    "title": "Pas uw quiz aan",
+    "description": "We hebben uw document geanalyseerd. Laten we nu de quiz instellen.",
+    "preview": "Voorbeeld van geëxtraheerde inhoud",
+    "numQuestions": "Aantal vragen",
+    "questionType": "Vraagtype",
+    "exerciseStyle": "Oefenstijl",
+    "difficulty": "Moeilijkheidsgraad",
+    "back": "Terug",
+    "generate": "Quiz genereren"
+  },
+  "quizDisplay": {
+    "description": "Beantwoord de volgende vragen naar uw beste vermogen.",
+    "placeholder": "Uw antwoord hier...",
+    "allAnswered": "Beantwoord alle vragen voordat u indient."
+  },
+  "quizResults": {
+    "title": "Quizresultaten",
+    "youScored": "U scoorde",
+    "scoreOutOf": "({correct} van de {total} correct)",
+    "yourAnswer": "Uw antwoord:",
+    "correctAnswer": "Correct antwoord:",
+    "explanation": "Uitleg:",
+    "noAnswer": "Geen antwoord",
+    "generateNew": "Nieuwe quiz genereren"
+  },
+  "languageSelector": {
+    "label": "UI Taal"
+  },
+  "enums": {
+    "subjectType": {
+      "Text": "Tekst",
+      "Math": "Wiskunde"
+    },
+    "quizType": {
+      "MultipleChoice": "Meerkeuze",
+      "TrueFalse": "Waar/Onwaar",
+      "Open": "Open vraag"
+    },
+    "mathQuizType": {
+      "SimilarExercises": "Soortgelijke oefeningen",
+      "ApplicationProblems": "Toepassingsproblemen"
+    },
+    "difficulty": {
+      "Easy": "Makkelijk",
+      "Medium": "Gemiddeld",
+      "Hard": "Moeilijk"
+    }
+  }
+}

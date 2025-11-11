@@ -6,6 +6,8 @@ export enum Language {
   Chinese = 'Chinese',
   Japanese = 'Japanese',
   Korean = 'Korean',
+  Dutch = 'Dutch',
+  Italian = 'Italian',
 }
 
 export enum SubjectType {
@@ -14,14 +16,14 @@ export enum SubjectType {
 }
 
 export enum QuizType {
-  MultipleChoice = 'Multiple Choice',
-  TrueFalse = 'True/False',
-  Open = 'Open Ended',
+  MultipleChoice = 'MultipleChoice',
+  TrueFalse = 'TrueFalse',
+  Open = 'Open',
 }
 
 export enum MathQuizType {
-  SimilarExercises = 'Similar Exercises',
-  ApplicationProblems = 'Application Problems',
+  SimilarExercises = 'SimilarExercises',
+  ApplicationProblems = 'ApplicationProblems',
 }
 
 export enum Difficulty {

@@ -1,0 +1,87 @@
+{
+  "app": {
+    "description": "Instantly generate quizzes from your documents or images using AI.",
+    "poweredBy": "Powered by Google Gemini",
+    "errorTitle": "An Error Occurred",
+    "errorGeneric": "Something went wrong.",
+    "startOver": "Start Over",
+    "submit": "Submit Quiz"
+  },
+  "loading": {
+    "thinking": "AI is thinking...",
+    "analyzing": "Analyzing document...",
+    "extracting": "Extracting text content...",
+    "finalizing": "Finalizing extraction...",
+    "extractionComplete": "Extraction complete!",
+    "understanding": "Understanding the content...",
+    "crafting": "Crafting insightful questions...",
+    "developing": "Developing answer keys...",
+    "assembling": "Assembling your quiz...",
+    "quizGenerated": "Quiz generated!"
+  },
+  "errors": {
+    "unknownExtraction": "An unknown error occurred during text extraction.",
+    "unknownQuizGeneration": "An unknown error occurred during quiz generation.",
+    "unsupportedFile": "Unsupported file type. Please upload an image or a single-page PDF.",
+    "pdfRender": "Failed to render PDF. It might be corrupted or unsupported.",
+    "fileProcess": "Could not process the file. Please try again."
+  },
+  "fileUpload": {
+    "renderingPdf": "Rendering PDF preview...",
+    "clickToUpload": "Click to upload",
+    "dragAndDrop": "or drag and drop",
+    "fileTypes": "Image or single-page PDF",
+    "subjectType": "Subject Type",
+    "documentLanguage": "Document Language",
+    "extractText": "Extract Text"
+  },
+  "quizOptions": {
+    "title": "Customize Your Quiz",
+    "description": "We've analyzed your document. Now, let's set up the quiz.",
+    "preview": "Extracted Content Preview",
+    "numQuestions": "Number of Questions",
+    "questionType": "Question Type",
+    "exerciseStyle": "Exercise Style",
+    "difficulty": "Difficulty",
+    "back": "Back",
+    "generate": "Generate Quiz"
+  },
+  "quizDisplay": {
+    "description": "Answer the following questions to the best of your ability.",
+    "placeholder": "Your answer here...",
+    "allAnswered": "Please answer all questions before submitting."
+  },
+  "quizResults": {
+    "title": "Quiz Results",
+    "youScored": "You scored",
+    "scoreOutOf": "({correct} out of {total} correct)",
+    "yourAnswer": "Your Answer:",
+    "correctAnswer": "Correct Answer:",
+    "explanation": "Explanation:",
+    "noAnswer": "No Answer",
+    "generateNew": "Generate New Quiz"
+  },
+  "languageSelector": {
+    "label": "UI Language"
+  },
+  "enums": {
+    "subjectType": {
+      "Text": "Text",
+      "Math": "Math"
+    },
+    "quizType": {
+      "MultipleChoice": "Multiple Choice",
+      "TrueFalse": "True/False",
+      "Open": "Open Ended"
+    },
+    "mathQuizType": {
+      "SimilarExercises": "Similar Exercises",
+      "ApplicationProblems": "Application Problems"
+    },
+    "difficulty": {
+      "Easy": "Easy",
+      "Medium": "Medium",
+      "Hard": "Hard"
+    }
+  }
+}

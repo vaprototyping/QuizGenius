@@ -1,6 +1,7 @@
 import React, { useState, useCallback, ChangeEvent } from 'react';
 import { Language, SubjectType } from '../types';
 import { UploadIcon } from './icons/UploadIcon';
+import { useI18n } from '../context/i18n';
 
 interface FileUploadProps {
   onFileProcessed: (base64Data: string, mimeType: string, language: Language, subject: SubjectType) => void;
@@ -56,6 +57,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
   const [language, setLanguage] = useState<Language>(Language.English);
   const [subjectType, setSubjectType] = useState<SubjectType>(SubjectType.Text);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useI18n();
 
   const handleFileChange = useCallback(async (event: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -75,17 +77,17 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
             setPreview(`data:image/jpeg;base64,${base64Image}`);
          } catch(e) {
             console.error("PDF rendering failed:", e);
-            setError("Failed to render PDF. It might be corrupted or unsupported.");
+            setError(t('errors.pdfRender'));
             setFile(null);
             setPreview(null);
          }
       } else {
-        setError('Unsupported file type. Please upload an image or a single-page PDF.');
+        setError(t('errors.unsupportedFile'));
         setFile(null);
         setPreview(null);
       }
     }
-  }, []);
+  }, [t]);
 
   const handleSubmit = useCallback(async () => {
     if (!file) return;
@@ -107,9 +109,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
         onFileProcessed(base64Data, mimeType, language, subjectType);
     } catch(e) {
         console.error("File processing failed:", e);
-        setError("Could not process the file. Please try again.");
+        setError(t('errors.fileProcess'));
     }
-  }, [file, language, subjectType, onFileProcessed]);
+  }, [file, language, subjectType, onFileProcessed, t]);
 
   return (
     <div className="flex flex-col items-center w-full">
@@ -120,7 +122,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
         {preview ? (
             preview === 'pdf' ? (
                 <div className="text-center">
-                    <p className="text-slate-500 dark:text-slate-400">Rendering PDF preview...</p>
+                    <p className="text-slate-500 dark:text-slate-400">{t('fileUpload.renderingPdf')}</p>
                 </div>
             ) : (
                 <img src={preview} alt="File preview" className="max-h-full max-w-full object-contain rounded-md" />
@@ -129,9 +131,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
           <div className="text-center">
             <UploadIcon className="mx-auto h-12 w-12 text-slate-400" />
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              <span className="font-semibold text-indigo-500">Click to upload</span> or drag and drop
+              <span className="font-semibold text-indigo-500">{t('fileUpload.clickToUpload')}</span> {t('fileUpload.dragAndDrop')}
             </p>
-            <p className="text-xs text-slate-400 dark:text-slate-500">Image or single-page PDF</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500">{t('fileUpload.fileTypes')}</p>
           </div>
         )}
       </label>
@@ -143,12 +145,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
            <p className="text-center truncate text-sm text-slate-500 dark:text-slate-400 mb-4">{file.name}</p>
            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Subject Type</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('fileUpload.subjectType')}</label>
                 <div className="flex rounded-md shadow-sm">
                  {Object.values(SubjectType).map((type, idx) => (
                     <button
                         key={type}
-                        // FIX: Cast string from Object.values to the SubjectType enum to satisfy the state setter's type.
                         onClick={() => setSubjectType(type as SubjectType)}
                         className={`px-4 py-2 text-sm font-medium border border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:z-10 w-full
                         ${subjectType === type ? 'bg-indigo-500 text-white' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'}
@@ -156,14 +157,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
                         ${idx === Object.values(SubjectType).length -1 ? 'rounded-r-md' : ''}
                         `}
                     >
-                        {type}
+                        {t(`enums.subjectType.${type}`)}
                     </button>
                  ))}
                 </div>
              </div>
               <div>
                 <label htmlFor="language" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Document Language
+                    {t('fileUpload.documentLanguage')}
                 </label>
                 <select
                     id="language"
@@ -183,7 +184,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
                     disabled={!file}
                     className="w-full whitespace-nowrap px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-slate-400 disabled:cursor-not-allowed"
                 >
-                    Extract Text
+                    {t('fileUpload.extractText')}
                 </button>
             </div>
         </div>
