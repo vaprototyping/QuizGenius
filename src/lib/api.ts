@@ -10,6 +10,8 @@ export async function generateQuiz(ocrText: string, quizType: "mcq" | "true_fals
   if (!res.ok || data.error) {
     throw new Error(data.error || "Generation failed");
   }
-  // DeepSeek (OpenAI-compatible) response shape:
+
+  // The serverless function returns OpenAI-compatible JSON.
+  // We'll return the raw content and let the caller parse/shape it.
   return data.choices?.[0]?.message?.content ?? "";
 }
