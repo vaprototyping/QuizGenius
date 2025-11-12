@@ -7,15 +7,32 @@ import { createWorker } from "tesseract.js";
 import type { Language, SubjectType } from "../types";
 
 /**
- * Convert base64 (data URL) to a Blob so tesseract.js can read it.
+ * Convert a base64 string (with or without data URL metadata) to a Blob so
+ * tesseract.js can read it reliably.
  */
-function dataURLToBlob(dataUrl: string): Blob {
-  const [meta, b64] = dataUrl.split(",");
-  const mime = meta.match(/data:(.*?);base64/)?.[1] || "image/png";
-  const bin = atob(b64);
-  const len = bin.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) bytes[i] = bin.charCodeAt(i);
+function base64ToBlob(data: string, fallbackMime: string): Blob {
+  let mime = fallbackMime || "image/png";
+  let base64 = data;
+
+  if (data.startsWith("data:")) {
+    const [meta, body] = data.split(",");
+    if (!body) throw new Error("Invalid data URL: missing base64 payload");
+    base64 = body;
+    const metaMatch = meta.match(/data:(.*?);base64/);
+    if (metaMatch?.[1]) mime = metaMatch[1];
+  }
+
+  const normalized = base64.replace(/\s/g, "");
+  if (!normalized) throw new Error("No base64 data to decode");
+
+  const padding = (4 - (normalized.length % 4)) % 4;
+  const padded = normalized + "=".repeat(padding);
+  const binary = atob(padded);
+
+  const length = binary.length;
+  const bytes = new Uint8Array(length);
+  for (let i = 0; i < length; i++) bytes[i] = binary.charCodeAt(i);
+
   return new Blob([bytes], { type: mime });
 }
 
@@ -28,7 +45,7 @@ export async function extractTextFromImage(
   _lang: Language,
   _subject: SubjectType
 ): Promise<string> {
-  const blob = dataURLToBlob(base64Data);
+  const blob = base64ToBlob(base64Data, _mimeType);
 
   const worker = await createWorker();
   // Load English by default; add more with worker.loadLanguage('eng+ita') etc.
