@@ -9,6 +9,7 @@ import { extractTextFromImage, generateQuiz } from './services/geminiService';
 import { Quiz, Language, SubjectType, QuizOptions } from './types';
 import { SparklesIcon } from './components/icons/SparklesIcon';
 import { useI18n } from './context/i18n';
+import { generateQuiz } from ".src/lib/api";
 
 const App: React.FC = () => {
   const [step, setStep] = useState<'upload' | 'options' | 'quiz' | 'results' | 'loading'>('upload');
