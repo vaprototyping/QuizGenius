@@ -20,9 +20,9 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const fetchTranslations = async () => {
       try {
         const [enRes, nlRes, itRes] = await Promise.all([
-          fetch('./locales/en.json'),
-          fetch('./locales/nl.json'),
-          fetch('./locales/it.json')
+          fetch('/locales/en.json'),
+          fetch('/locales/nl.json'),
+          fetch('/locales/it.json')
         ]);
 
         if (!enRes.ok || !nlRes.ok || !itRes.ok) {
@@ -38,7 +38,7 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       } catch (error) {
         console.error("Failed to load translations:", error);
         try {
-            const enRes = await fetch('./locales/en.json');
+            const enRes = await fetch('/locales/en.json');
             if (!enRes.ok) throw new Error('Failed to fetch English fallback.');
             const en = await enRes.json();
             setTranslations({ en });

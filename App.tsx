@@ -9,7 +9,7 @@ import { extractTextFromImage } from './services/geminiService';
 import { Quiz, Language, SubjectType, QuizOptions } from './types';
 import { SparklesIcon } from './components/icons/SparklesIcon';
 import { useI18n } from './context/i18n';
-import { generateQuiz as generateQuizAPI } from './lib/api';
+import { generateQuiz as generateQuizAPI } from './src/lib/api';
 
 function mapQuizType(opts: QuizOptions): "mcq" | "true_false" | "open" {
   const raw = (opts as any).questionType || (opts as any).type || "mcq";
