@@ -11,45 +11,44 @@ import { SparklesIcon } from './components/icons/SparklesIcon';
 import { useI18n } from './context/i18n';
 import { generateQuiz as generateQuizAPI } from './lib/api';
 
+function mapQuizType(opts: QuizOptions): "mcq" | "true_false" | "open" {
+  const raw = (opts as any).questionType || (opts as any).type || "mcq";
+  const normalized = String(raw).toLowerCase().replace("-", "_").replace(" ", "_");
+
+  if (normalized.includes("true") || normalized.includes("false")) return "true_false";
+  if (normalized.includes("open")) return "open";
+  return "mcq";
+}
+
 const App: React.FC = () => {
   const [step, setStep] = useState<'upload' | 'options' | 'quiz' | 'results' | 'loading'>('upload');
   const [error, setError] = useState<string | null>(null);
-  
   const [extractedText, setExtractedText] = useState<string | null>(null);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [currentQuizOptions, setCurrentQuizOptions] = useState<QuizOptions | null>(null);
-  
   const [language, setLanguage] = useState<Language>(Language.English);
   const [subjectType, setSubjectType] = useState<SubjectType>(SubjectType.Text);
-
   const { t } = useI18n();
-
-  // State for progress bar
   const [progress, setProgress] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState(t('loading.thinking'));
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
   const stopProgressSimulation = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
   }, []);
-
   const startProgressSimulation = useCallback((messages: string[], durationSeconds: number) => {
     stopProgressSimulation();
     setProgress(0);
-    
     let currentProgress = 0;
     const progressCap = 95;
     const intervalDuration = 100; // ms
     const totalUpdates = (durationSeconds * 1000) / intervalDuration;
     const increment = progressCap / totalUpdates;
-    
     let messageIndex = 0;
     setLoadingMessage(messages[0]);
-    
     intervalRef.current = setInterval(() => {
       currentProgress += increment;
       if (currentProgress < progressCap) {
@@ -65,7 +64,6 @@ const App: React.FC = () => {
       }
     }, intervalDuration);
   }, [stopProgressSimulation]);
-
   const handleFileProcessed = async (base64Data: string, mimeType: string, lang: Language, subject: SubjectType) => {
     setStep('loading');
     setError(null);
@@ -86,7 +84,6 @@ const App: React.FC = () => {
       setStep('upload');
     }
   };
-
   const handleQuizGenerate = async (options: QuizOptions) => {
     if (!extractedText) return;
     setStep('loading');
@@ -113,13 +110,11 @@ const App: React.FC = () => {
       setStep('options'); // Go back to options on error
     }
   };
-
   const handleSubmitQuiz = (answers: Record<number, string>) => {
     setUserAnswers(answers);
     setStep('results');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-
   const handleRestart = () => {
     stopProgressSimulation();
     setStep('upload');
@@ -129,14 +124,12 @@ const App: React.FC = () => {
     setUserAnswers({});
     setCurrentQuizOptions(null);
   };
-  
   const handleGenerateNewQuiz = () => {
       stopProgressSimulation();
       setStep('options');
       setQuiz(null);
       setUserAnswers({});
   }
-
   const renderContent = () => {
     if (step === 'loading') {
       return (
@@ -149,7 +142,6 @@ const App: React.FC = () => {
         </div>
       );
     }
-
     if (error) {
         return (
             <div className="text-center max-w-xl mx-auto">
@@ -164,7 +156,6 @@ const App: React.FC = () => {
             </div>
         )
     }
-
     switch (step) {
       case 'upload':
         return <FileUpload onFileProcessed={handleFileProcessed} />;
@@ -178,7 +169,6 @@ const App: React.FC = () => {
             onBack={handleRestart}
           />;
         }
-        // Fallback, should not happen, reset state
         handleRestart();
         return null;
       case 'quiz':
@@ -207,7 +197,6 @@ const App: React.FC = () => {
         return <FileUpload onFileProcessed={handleFileProcessed} />;
     }
   };
-
   return (
     <div className="bg-slate-50 dark:bg-slate-900 min-h-screen text-slate-900 dark:text-slate-100 font-sans relative">
       <header className="absolute top-4 right-4 z-10">
@@ -223,7 +212,6 @@ const App: React.FC = () => {
             {t('app.description')}
           </p>
         </div>
-        
         <div className="max-w-4xl mx-auto flex justify-center">
           {renderContent()}
         </div>
