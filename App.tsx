@@ -5,11 +5,11 @@ import { QuizDisplay } from './components/QuizDisplay';
 import { QuizResults } from './components/QuizResults';
 import { ProgressBar } from './components/ProgressBar';
 import { LanguageSelector } from './components/LanguageSelector';
-import { extractTextFromImage, generateQuiz } from './services/geminiService';
+import { extractTextFromImage } from './services/geminiService';
 import { Quiz, Language, SubjectType, QuizOptions } from './types';
 import { SparklesIcon } from './components/icons/SparklesIcon';
 import { useI18n } from './context/i18n';
-import { generateQuiz } from ".src/lib/api";
+import { generateQuiz as generateQuizAPI } from './lib/api';
 
 const App: React.FC = () => {
   const [step, setStep] = useState<'upload' | 'options' | 'quiz' | 'results' | 'loading'>('upload');
