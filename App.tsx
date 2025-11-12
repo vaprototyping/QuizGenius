@@ -20,6 +20,39 @@ function mapQuizType(opts: QuizOptions): "mcq" | "true_false" | "open" {
   return "mcq";
 }
 
+function fallbackParseToQuiz(raw: string, options: QuizOptions): Quiz {
+  const lines = raw.split('\n').map(s => s.trim()).filter(Boolean);
+
+  const questions: any[] = [];
+  let current: any = null;
+
+  for (const line of lines) {
+    const qMatch = line.match(/^Q\s*\d+[:.)-]\s*(.+)$/i);
+    const aMatch = line.match(/^[A-D][.)-]\s*(.+)$/i);
+    const ansMatch = line.match(/^Answer[:.)-]\s*([A-D])/i);
+
+    if (qMatch) {
+      if (current) questions.push(current);
+      current = { prompt: qMatch[1], choices: [], answer: null };
+    } else if (aMatch && current) {
+      current.choices.push(aMatch[1]);
+    } else if (ansMatch && current) {
+      current.answer = "ABCD".indexOf(ansMatch[1].toUpperCase());
+    }
+  }
+  if (current) questions.push(current);
+
+  return {
+    meta: { source: "llm", type: (options as any).questionType || "mcq" },
+    questions: questions.map((q, idx) => ({
+      id: idx + 1,
+      question: q.prompt,
+      options: q.choices,
+      correctIndex: typeof q.answer === "number" ? q.answer : 0
+    }))
+  } as unknown as Quiz;
+}
+
 const App: React.FC = () => {
   const [step, setStep] = useState<'upload' | 'options' | 'quiz' | 'results' | 'loading'>('upload');
   const [error, setError] = useState<string | null>(null);
@@ -96,18 +129,22 @@ const App: React.FC = () => {
         t('loading.assembling')
     ], 10);
     try {
-      const quizData = await generateQuiz(extractedText, options);
+      const typeForAPI = mapQuizType(options);
+      const llmContent = await generateQuizAPI(extractedText, typeForAPI);
+
+      const quizData: Quiz = fallbackParseToQuiz(llmContent, options);
+
       stopProgressSimulation();
       setProgress(100);
       setLoadingMessage(t('loading.quizGenerated'));
       setQuiz(quizData);
-      setUserAnswers({}); // Reset answers for new quiz
+      setUserAnswers({});
       setTimeout(() => setStep('quiz'), 500);
     } catch (e) {
       stopProgressSimulation();
       console.error(e);
       setError(e instanceof Error ? e.message : t('errors.unknownQuizGeneration'));
-      setStep('options'); // Go back to options on error
+      setStep('options');
     }
   };
   const handleSubmitQuiz = (answers: Record<number, string>) => {
