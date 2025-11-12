@@ -6,7 +6,15 @@ import { QuizResults } from './components/QuizResults';
 import { ProgressBar } from './components/ProgressBar';
 import { LanguageSelector } from './components/LanguageSelector';
 import { extractTextFromImage } from './services/geminiService';
-import { Quiz, Language, SubjectType, QuizOptions } from './types';
+import {
+  Quiz,
+  Language,
+  SubjectType,
+  QuizOptions,
+  QuizType,
+  Question,
+  TextQuizOptions
+} from './types';
 import { SparklesIcon } from './components/icons/SparklesIcon';
 import { useI18n } from './context/i18n';
 import { generateQuiz as generateQuizAPI } from './src/lib/api';
@@ -20,37 +28,332 @@ function mapQuizType(opts: QuizOptions): "mcq" | "true_false" | "open" {
   return "mcq";
 }
 
-function fallbackParseToQuiz(raw: string, options: QuizOptions): Quiz {
-  const lines = raw.split('\n').map(s => s.trim()).filter(Boolean);
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
 
-  const questions: any[] = [];
-  let current: any = null;
+function isTextQuizOptions(options: QuizOptions): options is TextQuizOptions {
+  return options.subjectType === SubjectType.Text;
+}
 
-  for (const line of lines) {
-    const qMatch = line.match(/^Q\s*\d+[:.)-]\s*(.+)$/i);
-    const aMatch = line.match(/^[A-D][.)-]\s*(.+)$/i);
-    const ansMatch = line.match(/^Answer[:.)-]\s*([A-D])/i);
-
-    if (qMatch) {
-      if (current) questions.push(current);
-      current = { prompt: qMatch[1], choices: [], answer: null };
-    } else if (aMatch && current) {
-      current.choices.push(aMatch[1]);
-    } else if (ansMatch && current) {
-      current.answer = "ABCD".indexOf(ansMatch[1].toUpperCase());
-    }
+function getRequestedQuizType(options: QuizOptions): QuizType {
+  if (isTextQuizOptions(options)) {
+    return options.quizType;
   }
-  if (current) questions.push(current);
+
+  return QuizType.Open;
+}
+
+function normalizeQuizType(input: unknown, fallbackType: QuizType): QuizType {
+  if (typeof input !== 'string') {
+    return fallbackType;
+  }
+
+  const normalized = input.toLowerCase();
+  if (normalized.includes('true') || normalized.includes('false')) {
+    return QuizType.TrueFalse;
+  }
+
+  if (normalized.includes('open') || normalized.includes('short')) {
+    return QuizType.Open;
+  }
+
+  if (fallbackType === QuizType.TrueFalse) {
+    return QuizType.TrueFalse;
+  }
+
+  if (fallbackType === QuizType.Open) {
+    return QuizType.Open;
+  }
+
+  return QuizType.MultipleChoice;
+}
+
+function extractJsonFromContent(raw: string): string | null {
+  const codeBlockMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (codeBlockMatch) {
+    return codeBlockMatch[1].trim();
+  }
+
+  const jsonStart = raw.trim().match(/^[\[{].*[\]}]$/s);
+  if (jsonStart) {
+    return raw.trim();
+  }
+
+  return null;
+}
+
+function normalizeAnswer(
+  rawAnswer: unknown,
+  type: QuizType,
+  options?: string[]
+): string {
+  if (Array.isArray(rawAnswer) && rawAnswer.length > 0) {
+    return normalizeAnswer(rawAnswer[0], type, options);
+  }
+
+  if (typeof rawAnswer === 'number' && options && options[rawAnswer]) {
+    return options[rawAnswer];
+  }
+
+  if (typeof rawAnswer === 'string') {
+    const trimmed = rawAnswer.trim();
+
+    if (!trimmed) {
+      if (options && options.length > 0) {
+        return options[0];
+      }
+
+      if (type === QuizType.Open) {
+        return 'Answers may vary.';
+      }
+
+      return '';
+    }
+
+    if (type === QuizType.MultipleChoice && options) {
+      const letterMatch = trimmed.match(/^[A-Z]$/i);
+      if (letterMatch) {
+        const index = letterMatch[0].toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0);
+        if (options[index]) {
+          return options[index];
+        }
+      }
+    }
+
+    if (type === QuizType.TrueFalse) {
+      const lower = trimmed.toLowerCase();
+      if (lower.startsWith('t')) {
+        return 'True';
+      }
+      if (lower.startsWith('f')) {
+        return 'False';
+      }
+    }
+
+    return trimmed;
+  }
+
+  if (isRecord(rawAnswer) && 'text' in rawAnswer && typeof rawAnswer.text === 'string') {
+    return rawAnswer.text.trim();
+  }
+
+  if (options && options.length > 0) {
+    return options[0];
+  }
+
+  if (type === QuizType.Open) {
+    return 'Answers may vary.';
+  }
+
+  return '';
+}
+
+function normalizeOptions(rawOptions: unknown): string[] {
+  if (Array.isArray(rawOptions)) {
+    return rawOptions.map((option) => String(option).trim()).filter(Boolean);
+  }
+
+  if (isRecord(rawOptions)) {
+    return Object.values(rawOptions).map((option) => String(option).trim()).filter(Boolean);
+  }
+
+  return [];
+}
+
+function mapJsonQuestionToQuestion(
+  rawQuestion: unknown,
+  fallbackType: QuizType
+): Question | null {
+  if (!isRecord(rawQuestion)) {
+    return null;
+  }
+
+  const prompt =
+    typeof rawQuestion.question === 'string'
+      ? rawQuestion.question
+      : typeof rawQuestion.prompt === 'string'
+        ? rawQuestion.prompt
+        : typeof rawQuestion.stem === 'string'
+          ? rawQuestion.stem
+          : typeof rawQuestion.text === 'string'
+            ? rawQuestion.text
+            : '';
+
+  const questionText = prompt.trim();
+  if (!questionText) {
+    return null;
+  }
+
+  const type = normalizeQuizType(rawQuestion.type ?? rawQuestion.questionType ?? rawQuestion.format, fallbackType);
+  const options = type === QuizType.MultipleChoice ? normalizeOptions(rawQuestion.options ?? rawQuestion.choices ?? rawQuestion.answers ?? rawQuestion.optionsList) : undefined;
+  const answer = normalizeAnswer(rawQuestion.answer ?? rawQuestion.correctAnswer ?? rawQuestion.correct ?? rawQuestion.solution ?? rawQuestion.key, type, options);
+  const explanationRaw = rawQuestion.explanation ?? rawQuestion.rationale ?? rawQuestion.reason ?? rawQuestion.feedback;
+  const explanation = typeof explanationRaw === 'string' ? explanationRaw.trim() : '';
+
+  if (type === QuizType.MultipleChoice && (!options || options.length === 0)) {
+    return null;
+  }
+
+  if (type === QuizType.TrueFalse && (!answer || (answer !== 'True' && answer !== 'False'))) {
+    return {
+      question: questionText,
+      options: ['True', 'False'],
+      answer: 'True',
+      explanation: explanation || 'No explanation provided.',
+      type: QuizType.TrueFalse,
+    };
+  }
 
   return {
-    meta: { source: "llm", type: (options as any).questionType || "mcq" },
-    questions: questions.map((q, idx) => ({
-      id: idx + 1,
-      question: q.prompt,
-      options: q.choices,
-      correctIndex: typeof q.answer === "number" ? q.answer : 0
-    }))
-  } as unknown as Quiz;
+    question: questionText,
+    options,
+    answer: answer || (type === QuizType.Open ? 'Answers may vary.' : ''),
+    explanation: explanation || 'No explanation provided.',
+    type,
+  };
+}
+
+function tryParseJsonQuiz(raw: string, options: QuizOptions): Quiz | null {
+  const fallbackType = getRequestedQuizType(options);
+  const jsonString = extractJsonFromContent(raw);
+  if (!jsonString) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(jsonString);
+    let title = 'Generated Quiz';
+    let rawQuestions: unknown[] = [];
+
+    if (isRecord(parsed)) {
+      const candidatePayload = isRecord(parsed.quiz) ? parsed.quiz : parsed;
+
+      if (isRecord(candidatePayload)) {
+        if (typeof candidatePayload.title === 'string' && candidatePayload.title.trim().length > 0) {
+          title = candidatePayload.title.trim();
+        }
+
+        if (Array.isArray(candidatePayload.questions)) {
+          rawQuestions = candidatePayload.questions;
+        } else if (Array.isArray(candidatePayload.items)) {
+          rawQuestions = candidatePayload.items;
+        }
+      }
+
+      if (Array.isArray(parsed.quiz)) {
+        rawQuestions = parsed.quiz;
+      } else if (isRecord(parsed.data)) {
+        const dataPayload = parsed.data;
+        if (isRecord(dataPayload.quiz) && Array.isArray(dataPayload.quiz.questions)) {
+          rawQuestions = dataPayload.quiz.questions;
+        } else if (Array.isArray(dataPayload.questions)) {
+          rawQuestions = dataPayload.questions;
+        }
+      } else if (Array.isArray(parsed.data)) {
+        rawQuestions = parsed.data;
+      }
+    } else if (Array.isArray(parsed)) {
+      rawQuestions = parsed;
+    }
+
+    const questions = rawQuestions
+      .map((item) => mapJsonQuestionToQuestion(item, fallbackType))
+      .filter((item): item is Question => Boolean(item));
+
+    if (questions.length === 0) {
+      return null;
+    }
+
+    return {
+      title,
+      questions,
+    };
+  } catch (error) {
+    console.warn('Failed to parse quiz JSON', error);
+    return null;
+  }
+}
+
+function fallbackParseToQuiz(raw: string, options: QuizOptions): Quiz {
+  const fallbackType = getRequestedQuizType(options);
+  const jsonQuiz = tryParseJsonQuiz(raw, options);
+  if (jsonQuiz) {
+    return jsonQuiz;
+  }
+
+  const blocks = raw
+    .split(/\n\s*\n/)
+    .map((block) => block.trim())
+    .filter(Boolean);
+
+  const questions: Question[] = [];
+
+  blocks.forEach((block) => {
+    const lines = block.split('\n').map((line) => line.trim()).filter(Boolean);
+    if (lines.length === 0) {
+      return;
+    }
+
+    const firstLine = lines[0].replace(/^(?:Q\s*\d+[:.)-]|\d+[:.)-])\s*/i, '').trim();
+    if (!firstLine) {
+      return;
+    }
+
+    let answer = '';
+    let explanation = '';
+    const optionsList: string[] = [];
+
+    for (const line of lines.slice(1)) {
+      const optionMatch = line.match(/^(?:[A-Z]|\d+)[.)-]\s*(.+)$/);
+      const answerMatch = line.match(/^(?:Correct\s+)?Answer[:.)-]\s*(.+)$/i);
+      const explanationMatch = line.match(/^(?:Explanation|Rationale)[:.)-]\s*(.+)$/i);
+
+      if (optionMatch) {
+        optionsList.push(optionMatch[1].trim());
+      } else if (answerMatch) {
+        answer = answerMatch[1].trim();
+      } else if (explanationMatch) {
+        explanation = explanationMatch[1].trim();
+      }
+    }
+
+    let questionType = fallbackType;
+    if (fallbackType === QuizType.TrueFalse) {
+      answer = normalizeAnswer(answer, QuizType.TrueFalse);
+    } else if (fallbackType === QuizType.MultipleChoice) {
+      const normalizedAnswer = normalizeAnswer(answer, QuizType.MultipleChoice, optionsList);
+      answer = normalizedAnswer;
+    } else if (!answer) {
+      answer = 'Answers may vary.';
+    }
+
+    if (fallbackType === QuizType.TrueFalse && optionsList.length === 0) {
+      optionsList.push('True', 'False');
+    }
+
+    if (fallbackType === QuizType.MultipleChoice && optionsList.length === 0) {
+      questionType = QuizType.Open;
+      answer = answer || 'Answers may vary.';
+    }
+
+    questions.push({
+      question: firstLine,
+      options: questionType === QuizType.MultipleChoice ? optionsList : undefined,
+      answer,
+      explanation: explanation || 'No explanation provided.',
+      type: questionType,
+    });
+  });
+
+  if (questions.length === 0) {
+    throw new Error('Unable to parse quiz content into questions.');
+  }
+
+  return {
+    title: 'Generated Quiz',
+    questions,
+  };
 }
 
 const App: React.FC = () => {
