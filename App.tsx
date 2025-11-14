@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, FormEvent } from 'react';
 import { FileUpload } from './components/FileUpload';
 import { QuizOptions as QuizOptionsComponent } from './components/QuizOptions';
 import { QuizDisplay } from './components/QuizDisplay';
@@ -365,6 +365,9 @@ const App: React.FC = () => {
   const [currentQuizOptions, setCurrentQuizOptions] = useState<QuizOptions | null>(null);
   const [language, setLanguage] = useState<Language>(Language.English);
   const [subjectType, setSubjectType] = useState<SubjectType>(SubjectType.Text);
+  const [isSecurityVerified, setIsSecurityVerified] = useState(false);
+  const [securityCodeInput, setSecurityCodeInput] = useState('');
+  const [securityError, setSecurityError] = useState<string | null>(null);
   const { t } = useI18n();
   const [progress, setProgress] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState(t('loading.thinking'));
@@ -469,6 +472,60 @@ const App: React.FC = () => {
       setStep('options');
       setQuiz(null);
       setUserAnswers({});
+  }
+  const handleSecuritySubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const trimmedCode = securityCodeInput.trim();
+
+    if (trimmedCode === '16071982') {
+      setIsSecurityVerified(true);
+      setSecurityError(null);
+      setSecurityCodeInput('');
+      return;
+    }
+
+    setSecurityError('Incorrect access code. Please try again.');
+  };
+  if (!isSecurityVerified) {
+    return (
+      <div className="bg-slate-50 dark:bg-slate-900 min-h-screen flex items-center justify-center px-4">
+        <div className="w-full max-w-md bg-white dark:bg-slate-800 shadow-xl rounded-xl p-8 space-y-6">
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Restricted Access</h1>
+            <p className="text-slate-600 dark:text-slate-300">
+              Enter the provided access code to continue to QwitzMe.ai.
+            </p>
+          </div>
+          <form onSubmit={handleSecuritySubmit} className="space-y-4">
+            <div>
+              <label htmlFor="security-code" className="block text-sm font-medium text-slate-700 dark:text-slate-200">
+                Access Code
+              </label>
+              <input
+                id="security-code"
+                type="password"
+                value={securityCodeInput}
+                onChange={(event) => setSecurityCodeInput(event.target.value)}
+                className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                placeholder="Enter access code"
+                autoFocus
+              />
+            </div>
+            {securityError && (
+              <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+                {securityError}
+              </p>
+            )}
+            <button
+              type="submit"
+              className="w-full rounded-md bg-indigo-600 px-4 py-2 text-white font-semibold shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            >
+              Continue
+            </button>
+          </form>
+        </div>
+      </div>
+    );
   }
   const renderContent = () => {
     if (step === 'loading') {
