@@ -33,7 +33,9 @@
     "fileTypes": "Image or single-page PDF",
     "subjectType": "Subject Type",
     "documentLanguage": "Document Language",
-    "extractText": "Extract Text"
+    "extractText": "Extract Text",
+    "useCamera": "Use camera to take a photo",
+    "cameraDescription": "Capture a new picture using your phone or tablet camera."
   },
   "quizOptions": {
     "title": "Customize Your Quiz",

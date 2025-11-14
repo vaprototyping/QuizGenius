@@ -33,7 +33,9 @@
     "fileTypes": "Afbeelding of PDF van één pagina",
     "subjectType": "Onderwerptype",
     "documentLanguage": "Taal van het document",
-    "extractText": "Tekst extraheren"
+    "extractText": "Tekst extraheren",
+    "useCamera": "Gebruik de camera om een foto te maken",
+    "cameraDescription": "Maak een nieuwe foto met de camera van uw telefoon of tablet."
   },
   "quizOptions": {
     "title": "Pas uw quiz aan",

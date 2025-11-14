@@ -33,7 +33,9 @@
     "fileTypes": "Immagine o PDF a pagina singola",
     "subjectType": "Tipo di materia",
     "documentLanguage": "Lingua del documento",
-    "extractText": "Estrai testo"
+    "extractText": "Estrai testo",
+    "useCamera": "Usa la fotocamera per scattare una foto",
+    "cameraDescription": "Scatta una nuova immagine con la fotocamera del tuo telefono o tablet."
   },
   "quizOptions": {
     "title": "Personalizza il tuo quiz",

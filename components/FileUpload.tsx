@@ -1,4 +1,4 @@
-import React, { useState, useCallback, ChangeEvent } from 'react';
+import React, { useState, useCallback, ChangeEvent, useRef } from 'react';
 import { Language, SubjectType } from '../types';
 import { UploadIcon } from './icons/UploadIcon';
 import { useI18n } from '../context/i18n';
@@ -58,6 +58,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
   const [subjectType, setSubjectType] = useState<SubjectType>(SubjectType.Text);
   const [error, setError] = useState<string | null>(null);
   const { t } = useI18n();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = useCallback(async (event: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -137,7 +139,36 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
           </div>
         )}
       </label>
-      <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept="image/*,application/pdf" />
+      <input
+        id="file-upload"
+        name="file-upload"
+        ref={fileInputRef}
+        type="file"
+        className="sr-only"
+        onChange={handleFileChange}
+        accept="image/*,application/pdf"
+      />
+      <input
+        id="camera-upload"
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="sr-only"
+        onChange={handleFileChange}
+      />
+      <div className="mt-4 w-full max-w-lg">
+        <button
+          type="button"
+          onClick={() => cameraInputRef.current?.click()}
+          className="w-full whitespace-nowrap px-4 py-2 border border-slate-300 dark:border-slate-600 text-sm font-medium rounded-md shadow-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          {t('fileUpload.useCamera')}
+        </button>
+        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 text-center">
+          {t('fileUpload.cameraDescription')}
+        </p>
+      </div>
       {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
       
       {file && (
