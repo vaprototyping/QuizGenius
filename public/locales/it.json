@@ -40,7 +40,8 @@
   "quizOptions": {
     "title": "Personalizza il tuo quiz",
     "description": "Abbiamo analizzato il tuo documento. Ora, impostiamo il quiz.",
-    "preview": "Anteprima del contenuto estratto",
+    "contentReadyTitle": "Contenuto pronto",
+    "contentReadyMessage": "Testo generato con successo. Seleziona il tipo di quiz.",
     "numQuestions": "Numero di domande",
     "questionType": "Tipo di domanda",
     "exerciseStyle": "Stile degli esercizi",

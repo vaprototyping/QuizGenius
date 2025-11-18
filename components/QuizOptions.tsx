@@ -126,9 +126,14 @@ export const QuizOptions: React.FC<QuizOptionsProps> = ({
       </p>
 
       <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md border border-slate-200 dark:border-slate-700">
-        <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4">{t('quizOptions.preview')}</h3>
-        <div className="max-h-40 overflow-y-auto p-4 bg-slate-50 dark:bg-slate-900/50 rounded-md border border-slate-200 dark:border-slate-700">
-          <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-wrap">{extractedText}</p>
+        <div className="flex items-start gap-3">
+          <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-300">
+            <span className="text-xl" aria-hidden="true">✓</span>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-1">{t('quizOptions.contentReadyTitle')}</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400">{t('quizOptions.contentReadyMessage')}</p>
+          </div>
         </div>
       </div>
 
