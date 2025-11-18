@@ -40,7 +40,8 @@
   "quizOptions": {
     "title": "Customize Your Quiz",
     "description": "We've analyzed your document. Now, let's set up the quiz.",
-    "preview": "Extracted Content Preview",
+    "contentReadyTitle": "Content ready",
+    "contentReadyMessage": "Text successfully generated. Select the type of Quiz.",
     "numQuestions": "Number of Questions",
     "questionType": "Question Type",
     "exerciseStyle": "Exercise Style",

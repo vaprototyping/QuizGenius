@@ -40,7 +40,8 @@
   "quizOptions": {
     "title": "Pas uw quiz aan",
     "description": "We hebben uw document geanalyseerd. Laten we nu de quiz instellen.",
-    "preview": "Voorbeeld van geëxtraheerde inhoud",
+    "contentReadyTitle": "Inhoud klaar",
+    "contentReadyMessage": "Tekst succesvol gegenereerd. Kies het type quiz.",
     "numQuestions": "Aantal vragen",
     "questionType": "Vraagtype",
     "exerciseStyle": "Oefenstijl",
