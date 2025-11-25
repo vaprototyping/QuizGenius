@@ -3,7 +3,9 @@ export const onRequestPost: PagesFunction = async ({ request, env }) => {
   try {
     const { text, quizType } = await request.json();
 
-    const apiKey = env?.DEEPSEEK_API_KEY ?? process.env.DEEPSEEK_API_KEY;
+    const apiKey =
+      env?.DEEPSEEK_API_KEY ??
+      (typeof process !== "undefined" ? process.env?.DEEPSEEK_API_KEY : undefined);
     if (!apiKey || typeof apiKey !== "string" || !apiKey.trim()) {
       return new Response(
         JSON.stringify({
