@@ -233,18 +233,20 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
         className="sr-only"
         onChange={handleFileChange}
       />
-      <div className="mt-4 w-full max-w-lg">
-        <button
-          type="button"
-          onClick={() => cameraInputRef.current?.click()}
-          className="w-full whitespace-nowrap px-4 py-2 border border-slate-300 dark:border-slate-600 text-sm font-medium rounded-md shadow-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          {t('fileUpload.useCamera')}
-        </button>
-        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 text-center">
-          {t('fileUpload.cameraDescription')}
-        </p>
-      </div>
+      {files.length === 0 && (
+        <div className="mt-4 w-full max-w-lg">
+          <button
+            type="button"
+            onClick={() => cameraInputRef.current?.click()}
+            className="w-full whitespace-nowrap px-4 py-2 border border-slate-300 dark:border-slate-600 text-sm font-medium rounded-md shadow-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            {t('fileUpload.useCamera')}
+          </button>
+          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 text-center">
+            {t('fileUpload.cameraDescription')}
+          </p>
+        </div>
+      )}
       {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
 
       {files.length > 0 && (
