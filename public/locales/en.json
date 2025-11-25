@@ -1,7 +1,7 @@
 {
   "app": {
     "description": "Instantly generate quizzes from your documents or images using AI.",
-    "poweredBy": "Powered by Google Gemini",
+    "poweredBy": "Powered by AI",
     "errorTitle": "An Error Occurred",
     "errorGeneric": "Something went wrong.",
     "startOver": "Start Over",

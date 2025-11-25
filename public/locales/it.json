@@ -1,7 +1,7 @@
 {
   "app": {
     "description": "Genera istantaneamente quiz dai tuoi documenti o immagini usando l'IA.",
-    "poweredBy": "Realizzato con Google Gemini",
+    "poweredBy": "Realizzato con l'IA",
     "errorTitle": "Si è verificato un errore",
     "errorGeneric": "Qualcosa è andato storto.",
     "startOver": "Ricomincia",

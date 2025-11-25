@@ -1,7 +1,7 @@
 {
   "app": {
     "description": "Genereer direct quizzen van uw documenten of afbeeldingen met behulp van AI.",
-    "poweredBy": "Mogelijk gemaakt door Google Gemini",
+    "poweredBy": "Mogelijk gemaakt door AI",
     "errorTitle": "Er is een fout opgetreden",
     "errorGeneric": "Er is iets misgegaan.",
     "startOver": "Opnieuw beginnen",
