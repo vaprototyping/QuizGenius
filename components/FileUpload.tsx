@@ -179,7 +179,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
     <div className="flex flex-col items-center w-full">
       <label
         htmlFor="file-upload"
-        className="w-full h-64 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+        className="w-full h-64 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg flex flex-col items-center justify-center cursor-pointer bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-700/70 transition-colors shadow-inner"
       >
         {preview ? (
           preview === 'pdf' ? (
@@ -202,12 +202,16 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{t('fileUpload.docxReady')}</p>
           </div>
         ) : (
-          <div className="text-center">
+          <div className="text-center space-y-3">
+            <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400">
+              <span className="text-xl" aria-hidden>🖼️</span>
+              <span className="text-xl" aria-hidden>📄</span>
+            </div>
             <UploadIcon className="mx-auto h-12 w-12 text-slate-400" />
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               <span className="font-semibold text-indigo-500">{t('fileUpload.clickToUpload')}</span> {t('fileUpload.dragAndDrop')}
             </p>
-            <p className="text-xs text-slate-400 dark:text-slate-500">{t('fileUpload.fileTypes')}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Images: JPG/PNG (max 5) · PDF/DOCX (max 15 pages)</p>
           </div>
         )}
       </label>
