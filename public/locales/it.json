@@ -22,20 +22,28 @@
   "errors": {
     "unknownExtraction": "Si è verificato un errore sconosciuto durante l'estrazione del testo.",
     "unknownQuizGeneration": "Si è verificato un errore sconosciuto durante la generazione del quiz.",
-    "unsupportedFile": "Tipo di file non supportato. Carica un'immagine o un PDF a pagina singola.",
+    "unsupportedFile": "Tipo di file non supportato. Carica immagini, un PDF o un file DOCX.",
     "pdfRender": "Impossibile visualizzare il PDF. Potrebbe essere corrotto o non supportato.",
-    "fileProcess": "Impossibile elaborare il file. Riprova."
+    "fileProcess": "Impossibile elaborare il file. Riprova.",
+    "mixedFiles": "Carica più immagini oppure un singolo documento (PDF/DOCX).",
+    "tooManyImages": "Puoi caricare fino a 5 immagini alla volta.",
+    "tooManyDocuments": "È possibile caricare un solo documento (PDF o DOCX) alla volta.",
+    "singleDocumentOnly": "Un PDF o DOCX deve essere caricato da solo, senza altri file.",
+    "pdfPageLimit": "I PDF sono limitati a 15 pagine. Carica un documento più corto."
   },
   "fileUpload": {
     "renderingPdf": "Rendering anteprima PDF...",
     "clickToUpload": "Clicca per caricare",
     "dragAndDrop": "o trascina e rilascia",
-    "fileTypes": "Immagine o PDF a pagina singola",
+    "fileTypes": "Fino a 5 immagini oppure un PDF/DOCX (max 15 pagine)",
     "subjectType": "Tipo di materia",
     "documentLanguage": "Lingua del documento",
     "extractText": "Estrai testo",
     "useCamera": "Usa la fotocamera per scattare una foto",
-    "cameraDescription": "Scatta una nuova immagine con la fotocamera del tuo telefono o tablet."
+    "cameraDescription": "Scatta una nuova immagine con la fotocamera del tuo telefono o tablet.",
+    "multipleCount": "+{count}",
+    "multipleFiles": "{count} file selezionati",
+    "docxReady": "DOCX selezionato e pronto"
   },
   "quizOptions": {
     "title": "Personalizza il tuo quiz",

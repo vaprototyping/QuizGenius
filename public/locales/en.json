@@ -22,20 +22,28 @@
   "errors": {
     "unknownExtraction": "An unknown error occurred during text extraction.",
     "unknownQuizGeneration": "An unknown error occurred during quiz generation.",
-    "unsupportedFile": "Unsupported file type. Please upload an image or a single-page PDF.",
+    "unsupportedFile": "Unsupported file type. Please upload images, a PDF, or a DOCX file.",
     "pdfRender": "Failed to render PDF. It might be corrupted or unsupported.",
-    "fileProcess": "Could not process the file. Please try again."
+    "fileProcess": "Could not process the file. Please try again.",
+    "mixedFiles": "Please upload either multiple images or a single document (PDF/DOCX).",
+    "tooManyImages": "You can upload up to 5 images at a time.",
+    "tooManyDocuments": "Only one document (PDF or DOCX) can be uploaded at once.",
+    "singleDocumentOnly": "A PDF or DOCX must be uploaded alone, not with other files.",
+    "pdfPageLimit": "PDFs are limited to 15 pages. Please upload a shorter document."
   },
   "fileUpload": {
     "renderingPdf": "Rendering PDF preview...",
     "clickToUpload": "Click to upload",
     "dragAndDrop": "or drag and drop",
-    "fileTypes": "Image or single-page PDF",
+    "fileTypes": "Up to 5 images, or one PDF/DOCX (max 15 pages)",
     "subjectType": "Subject Type",
     "documentLanguage": "Document Language",
     "extractText": "Extract Text",
     "useCamera": "Use camera to take a photo",
-    "cameraDescription": "Capture a new picture using your phone or tablet camera."
+    "cameraDescription": "Capture a new picture using your phone or tablet camera.",
+    "multipleCount": "+{count}",
+    "multipleFiles": "{count} files selected",
+    "docxReady": "DOCX selected and ready"
   },
   "quizOptions": {
     "title": "Customize Your Quiz",

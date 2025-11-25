@@ -5,7 +5,7 @@ import { QuizDisplay } from './components/QuizDisplay';
 import { QuizResults } from './components/QuizResults';
 import { ProgressBar } from './components/ProgressBar';
 import { LanguageSelector } from './components/LanguageSelector';
-import { extractTextFromImage } from './services/geminiService';
+import { extractTextFromUploads } from './services/geminiService';
 import {
   Quiz,
   Language,
@@ -403,14 +403,15 @@ const App: React.FC = () => {
       }
     }, intervalDuration);
   }, [stopProgressSimulation]);
-  const handleFileProcessed = async (base64Data: string, mimeType: string, lang: Language, subject: SubjectType) => {
+  const handleFileProcessed = async (selectedFiles: File[], lang: Language, subject: SubjectType) => {
     setStep('loading');
     setError(null);
     setLanguage(lang);
     setSubjectType(subject);
-    startProgressSimulation([t('loading.analyzing'), t('loading.extracting'), t('loading.finalizing')], 5);
+    const duration = Math.min(15, Math.max(6, selectedFiles.length * 3));
+    startProgressSimulation([t('loading.analyzing'), t('loading.extracting'), t('loading.finalizing')], duration);
     try {
-      const text = await extractTextFromImage(base64Data, mimeType, lang, subject);
+      const text = await extractTextFromUploads(selectedFiles, lang, subject);
       stopProgressSimulation();
       setProgress(100);
       setLoadingMessage(t('loading.extractionComplete'));
