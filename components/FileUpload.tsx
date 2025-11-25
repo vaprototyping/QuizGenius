@@ -2,7 +2,7 @@ import React, { useState, useCallback, ChangeEvent, useRef } from 'react';
 import { Language, SubjectType } from '../types';
 import { UploadIcon } from './icons/UploadIcon';
 import { useI18n } from '../context/i18n';
-import { isDocxMime } from '../services/geminiService';
+import { isDocxMime } from '../services/textExtractionService';
 
 interface FileUploadProps {
   onFileProcessed: (files: File[], language: Language, subject: SubjectType) => void;

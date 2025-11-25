@@ -5,7 +5,7 @@ import { QuizDisplay } from './components/QuizDisplay';
 import { QuizResults } from './components/QuizResults';
 import { ProgressBar } from './components/ProgressBar';
 import { LanguageSelector } from './components/LanguageSelector';
-import { extractTextFromUploads } from './services/geminiService';
+import { extractTextFromUploads } from './services/textExtractionService';
 import {
   Quiz,
   Language,

@@ -1,4 +1,4 @@
-// src/services/geminiService.ts
+// src/services/textExtractionService.ts
 // This file now ONLY does client-side OCR using tesseract.js (no API keys in browser).
 
 import { createWorker } from "tesseract.js";
