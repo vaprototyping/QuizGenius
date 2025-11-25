@@ -9,7 +9,8 @@ export const onRequestPost: PagesFunction = async ({ request, env }) => {
     if (!apiKey || typeof apiKey !== "string" || !apiKey.trim()) {
       return new Response(
         JSON.stringify({
-          error: "Quiz generation is not configured. Please set a valid DEEPSEEK_API_KEY in your deployment environment.",
+          error:
+            "Quiz generation is not configured. Please set a valid DEEPSEEK_API_KEY for this deployment (including Preview branches).",
         }),
         { status: 500 }
       );

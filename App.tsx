@@ -587,7 +587,7 @@ const App: React.FC = () => {
         return 'Assembling your quiz…';
       })();
       return (
-        <div className="w-full max-w-lg mx-auto flex flex-col items-center gap-4 py-6">
+        <div className="w-full max-w-lg mx-auto flex flex-col items-center gap-4 py-10" role="status" aria-live="polite">
           <div className="h-12 w-12 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin" aria-hidden="true"></div>
           <p className="text-sm font-medium text-slate-700 dark:text-slate-200 text-center">{processingText}</p>
         </div>
