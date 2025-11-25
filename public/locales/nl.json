@@ -22,20 +22,28 @@
   "errors": {
     "unknownExtraction": "Er is een onbekende fout opgetreden tijdens het extraheren van de tekst.",
     "unknownQuizGeneration": "Er is een onbekende fout opgetreden tijdens het genereren van de quiz.",
-    "unsupportedFile": "Niet-ondersteund bestandstype. Upload een afbeelding of een PDF van één pagina.",
+    "unsupportedFile": "Niet-ondersteund bestandstype. Upload afbeeldingen, een PDF of een DOCX-bestand.",
     "pdfRender": "Kon PDF niet weergeven. Het is mogelijk beschadigd of niet-ondersteund.",
-    "fileProcess": "Kon het bestand niet verwerken. Probeer het opnieuw."
+    "fileProcess": "Kon het bestand niet verwerken. Probeer het opnieuw.",
+    "mixedFiles": "Upload meerdere afbeeldingen of één enkel document (PDF/DOCX).",
+    "tooManyImages": "Je kunt maximaal 5 afbeeldingen tegelijk uploaden.",
+    "tooManyDocuments": "Er kan slechts één document (PDF of DOCX) tegelijk worden geüpload.",
+    "singleDocumentOnly": "Een PDF of DOCX moet alleen worden geüpload, zonder andere bestanden.",
+    "pdfPageLimit": "PDF's zijn beperkt tot 15 pagina's. Upload een korter document."
   },
   "fileUpload": {
     "renderingPdf": "PDF-voorbeeld renderen...",
     "clickToUpload": "Klik om te uploaden",
     "dragAndDrop": "of sleep het hierheen",
-    "fileTypes": "Afbeelding of PDF van één pagina",
+    "fileTypes": "Tot 5 afbeeldingen of één PDF/DOCX (max 15 pagina's)",
     "subjectType": "Onderwerptype",
     "documentLanguage": "Taal van het document",
     "extractText": "Tekst extraheren",
     "useCamera": "Gebruik de camera om een foto te maken",
-    "cameraDescription": "Maak een nieuwe foto met de camera van uw telefoon of tablet."
+    "cameraDescription": "Maak een nieuwe foto met de camera van uw telefoon of tablet.",
+    "multipleCount": "+{count}",
+    "multipleFiles": "{count} bestanden geselecteerd",
+    "docxReady": "DOCX geselecteerd en klaar"
   },
   "quizOptions": {
     "title": "Pas uw quiz aan",
