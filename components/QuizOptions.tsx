@@ -20,6 +20,15 @@ export const QuizOptions: React.FC<QuizOptionsProps> = ({
 }) => {
   const [numberOfQuestions, setNumberOfQuestions] = useState(5);
 
+  const clampNumberOfQuestions = (value: number) => {
+    if (!Number.isFinite(value)) return 1;
+
+    if (value < 1) return 1;
+    if (value > 15) return 15;
+
+    return value;
+  };
+
   // State for Text-based quizzes
   const [quizType, setQuizType] = useState<QuizType>(QuizType.MultipleChoice);
 
@@ -147,9 +156,9 @@ export const QuizOptions: React.FC<QuizOptionsProps> = ({
               type="number"
               id="num-questions"
               value={numberOfQuestions}
-              onChange={(e) => setNumberOfQuestions(Math.max(1, parseInt(e.target.value, 10)))}
+              onChange={(e) => setNumberOfQuestions(clampNumberOfQuestions(parseInt(e.target.value, 10)))}
               min="1"
-              max="20"
+              max="15"
               className="mt-1 block w-full pl-3 pr-3 py-2 text-base bg-white dark:bg-slate-900 focus:outline-none focus:ring-indigo-500 sm:text-sm rounded-md border-2 border-dashed border-indigo-400 dark:border-indigo-500"
             />
           </div>

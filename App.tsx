@@ -466,7 +466,8 @@ const App: React.FC = () => {
     ], 10);
     try {
       const typeForAPI = mapQuizType(options);
-      const llmContent = await generateQuizAPI(extractedText, typeForAPI);
+      const countForAPI = Math.min(15, Math.max(1, Number(options.numberOfQuestions) || 1));
+      const llmContent = await generateQuizAPI(extractedText, typeForAPI, countForAPI);
 
       const quizData: Quiz = fallbackParseToQuiz(llmContent, options);
 
