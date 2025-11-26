@@ -1,9 +1,13 @@
 // src/lib/api.ts
-export async function generateQuiz(ocrText: string, quizType: "mcq" | "true_false" | "open") {
+export async function generateQuiz(
+  ocrText: string,
+  quizType: "mcq" | "true_false" | "open",
+  numberOfQuestions: number
+) {
   const res = await fetch("/api/generate-quiz", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text: ocrText, quizType })
+    body: JSON.stringify({ text: ocrText, quizType, numberOfQuestions })
   });
 
   const data = await res.json();

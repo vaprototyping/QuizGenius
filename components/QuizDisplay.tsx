@@ -14,6 +14,30 @@ interface QuizDisplayProps {
 export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, setUserAnswers, onSubmit, subjectType }) => {
   const { t } = useI18n();
 
+  const isTrueFalseQuestion = (question: Question) => {
+    const normalizedType = typeof question.type === 'string' ? question.type.toLowerCase().replace(/[-_\s]/g, '') : '';
+
+    if (
+      normalizedType === 'truefalse' ||
+      normalizedType === 'boolean' ||
+      normalizedType === 'true/false' ||
+      normalizedType.includes('truefalse') ||
+      normalizedType.includes('boolean')
+    ) {
+      return true;
+    }
+
+    const normalizedOptions = question.options?.map((option) => option.toLowerCase().trim());
+    if (normalizedOptions && normalizedOptions.length === 2) {
+      const uniqueOptions = new Set(normalizedOptions);
+      if (uniqueOptions.has('true') && uniqueOptions.has('false')) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
   useEffect(() => {
     if (subjectType === SubjectType.Math && window.renderMathInElement) {
       const element = document.getElementById('quiz-display');
@@ -32,6 +56,8 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
 
   const renderQuestion = (question: Question, index: number) => {
     const userAnswer = userAnswers[index] || '';
+    const isTrueFalse = isTrueFalseQuestion(question);
+    const trueFalseOptions = ['True', 'False'];
 
     return (
       <div key={index} className="mb-8 p-6 bg-white dark:bg-slate-800 rounded-xl shadow-md border border-slate-200 dark:border-slate-700">
@@ -42,7 +68,7 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
               {subjectType === SubjectType.Math ? <MathText text={question.question} /> : question.question}
             </p>
             
-            {question.type === QuizType.MultipleChoice && question.options && (
+            {question.type === QuizType.MultipleChoice && question.options && !isTrueFalse && (
               <div className="space-y-3">
                 {question.options.map((option, i) => (
                   <label key={i} className="flex items-center p-3 rounded-lg border border-slate-300 dark:border-slate-600 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors has-[:checked]:bg-indigo-50 dark:has-[:checked]:bg-indigo-900/20 has-[:checked]:border-indigo-500">
@@ -62,9 +88,9 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
               </div>
             )}
 
-            {question.type === QuizType.TrueFalse && (
+            {isTrueFalse && (
               <div className="flex space-x-4">
-                {['True', 'False'].map((option) => (
+                {trueFalseOptions.map((option) => (
                   <label key={option} className="flex-1 flex items-center justify-center p-3 rounded-lg border border-slate-300 dark:border-slate-600 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors has-[:checked]:bg-indigo-50 dark:has-[:checked]:bg-indigo-900/20 has-[:checked]:border-indigo-500">
                     <input
                       type="radio"

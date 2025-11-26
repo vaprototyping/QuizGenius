@@ -1,7 +1,12 @@
 // functions/api/generate-quiz.ts
 export const onRequestPost: PagesFunction = async ({ request, env }) => {
   try {
-    const { text, quizType } = await request.json();
+    const { text, quizType, numberOfQuestions } = await request.json();
+
+    const requestedCount = Number(numberOfQuestions);
+    const normalizedCount = Number.isFinite(requestedCount)
+      ? Math.min(15, Math.max(1, requestedCount))
+      : 5;
 
     const apiKey =
       env?.DEEPSEEK_API_KEY ??
@@ -18,14 +23,18 @@ export const onRequestPost: PagesFunction = async ({ request, env }) => {
 
     const baseInstructions = `You are QuizGenius, a master educator who writes rigorous, unambiguous quizzes.
 Focus exclusively on the supplied source material. Do not invent facts that are not supported by it.
+Never format true/false items as questions — they must always be statements.
 Always include a brief explanation that teaches the key idea behind the answer.`;
 
     const typeInstructions = {
-      mcq: `Create exactly five multiple-choice questions. Each question must have four plausible answer choices labelled as an array of strings.
+      mcq: `Create exactly ${normalizedCount} multiple-choice questions. Each question must have four plausible answer choices labelled as an array of strings.
 Ensure only one option is correct and the remaining options are credible distractors drawn from the context.`,
-      true_false: `Create exactly six true/false statements. Mix truths and misconceptions that can be validated by the context.
-Set the answer field to either "True" or "False".`,
-      open: `Create exactly five short-answer questions that require a concise response (1-3 sentences or a specific fact).
+      true_false: `Create exactly ${normalizedCount} declarative true/false statements.
+Each must be a clear factual claim drawn strictly from the source material.
+Do NOT phrase statements as questions — no question marks, no question-like forms, and no "Is it true that..." or similar patterns.
+Include a mix of accurate statements and plausible misconceptions.
+Each item must include an "answer" field set to either "True" or "False".`,
+      open: `Create exactly ${normalizedCount} short-answer questions that require a concise response (1-3 sentences or a specific fact).
 Answers should still be grounded in the context.`,
     }[quizType as "mcq" | "true_false" | "open"] ?? "";
 

@@ -19,7 +19,8 @@ import { useI18n } from './context/i18n';
 import { generateQuiz as generateQuizAPI } from './src/lib/api';
 
 function mapQuizType(opts: QuizOptions): "mcq" | "true_false" | "open" {
-  const raw = (opts as any).questionType || (opts as any).type || "mcq";
+  const raw =
+    (opts as any).quizType || (opts as any).questionType || (opts as any).type || "mcq";
   const normalized = String(raw).toLowerCase().replace("-", "_").replace(" ", "_");
 
   if (normalized.includes("true") || normalized.includes("false")) return "true_false";
@@ -465,7 +466,8 @@ const App: React.FC = () => {
     ], 10);
     try {
       const typeForAPI = mapQuizType(options);
-      const llmContent = await generateQuizAPI(extractedText, typeForAPI);
+      const countForAPI = Math.min(15, Math.max(1, Number(options.numberOfQuestions) || 1));
+      const llmContent = await generateQuizAPI(extractedText, typeForAPI, countForAPI);
 
       const quizData: Quiz = fallbackParseToQuiz(llmContent, options);
 
