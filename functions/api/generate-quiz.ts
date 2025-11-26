@@ -23,8 +23,12 @@ Always include a brief explanation that teaches the key idea behind the answer.`
     const typeInstructions = {
       mcq: `Create exactly five multiple-choice questions. Each question must have four plausible answer choices labelled as an array of strings.
 Ensure only one option is correct and the remaining options are credible distractors drawn from the context.`,
-      true_false: `Create exactly six true/false statements. Each item must be a concise, standalone statement (no question wording, prefixes, or prompts) so the student decides whether the statement itself is true or false.
-Mix truths and misconceptions that can be validated by the context. Set the answer field to either "True" or "False".`,
+      true_false: `Create exactly six true/false statements.
+Every item must be a declarative statement (not a question) so the student only judges whether the statement is true or false.
+Remove any question formatting: no question marks, interrogative phrasing (who/what/when/where/why/how), or leading prompts.
+If the source uses a question, rewrite it into a neutral statement that can be evaluated as true or false.
+Mix truths and misconceptions that can be validated by the context.
+Set the answer field to either "True" or "False".`,
       open: `Create exactly five short-answer questions that require a concise response (1-3 sentences or a specific fact).
 Answers should still be grounded in the context.`,
     }[quizType as "mcq" | "true_false" | "open"] ?? "";
