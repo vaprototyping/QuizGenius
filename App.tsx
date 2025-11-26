@@ -3,9 +3,8 @@ import { FileUpload } from './components/FileUpload';
 import { QuizOptions as QuizOptionsComponent } from './components/QuizOptions';
 import { QuizDisplay } from './components/QuizDisplay';
 import { QuizResults } from './components/QuizResults';
-import { ProgressBar } from './components/ProgressBar';
 import { LanguageSelector } from './components/LanguageSelector';
-import { extractTextFromUploads } from './services/textExtractionService';
+import { extractTextFromUploads, isDocxMime } from './services/textExtractionService';
 import {
   Quiz,
   Language,
@@ -371,7 +370,22 @@ const App: React.FC = () => {
   const { t } = useI18n();
   const [progress, setProgress] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState(t('loading.thinking'));
+  const [processingDetails, setProcessingDetails] = useState<
+    | { type: 'images'; totalItems: number }
+    | { type: 'pdf'; totalPages: number }
+    | { type: 'docx' }
+    | { type: 'quiz' }
+    | null
+  >(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const getPdfPageCount = useCallback(async (file: File): Promise<number> => {
+    const pdfjsLib = (window as any).pdfjsLib;
+    if (!pdfjsLib) return 0;
+
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+    return pdf.numPages || 0;
+  }, []);
   const stopProgressSimulation = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -408,6 +422,17 @@ const App: React.FC = () => {
     setError(null);
     setLanguage(lang);
     setSubjectType(subject);
+    const images = selectedFiles.filter((file) => file.type.startsWith('image/'));
+    const pdfFile = selectedFiles.find((file) => file.type === 'application/pdf');
+    const docxFile = selectedFiles.find((file) => isDocxMime(file.type));
+    if (images.length > 0) {
+      setProcessingDetails({ type: 'images', totalItems: images.length });
+    } else if (pdfFile) {
+      const pageCount = await getPdfPageCount(pdfFile);
+      setProcessingDetails({ type: 'pdf', totalPages: Math.max(1, pageCount) });
+    } else if (docxFile) {
+      setProcessingDetails({ type: 'docx' });
+    }
     const duration = Math.min(15, Math.max(6, selectedFiles.length * 3));
     startProgressSimulation([t('loading.analyzing'), t('loading.extracting'), t('loading.finalizing')], duration);
     try {
@@ -416,11 +441,13 @@ const App: React.FC = () => {
       setProgress(100);
       setLoadingMessage(t('loading.extractionComplete'));
       setExtractedText(text ?? '');
+      setProcessingDetails(null);
       setTimeout(() => setStep('options'), 500);
     } catch (e) {
       stopProgressSimulation();
       console.error(e);
       setError(e instanceof Error ? e.message : t('errors.unknownExtraction'));
+      setProcessingDetails(null);
       setStep('upload');
     }
   };
@@ -429,6 +456,7 @@ const App: React.FC = () => {
     setStep('loading');
     setError(null);
     setCurrentQuizOptions(options);
+    setProcessingDetails({ type: 'quiz' });
     startProgressSimulation([
         t('loading.understanding'),
         t('loading.crafting'),
@@ -446,11 +474,13 @@ const App: React.FC = () => {
       setLoadingMessage(t('loading.quizGenerated'));
       setQuiz(quizData);
       setUserAnswers({});
+      setProcessingDetails(null);
       setTimeout(() => setStep('quiz'), 500);
     } catch (e) {
       stopProgressSimulation();
       console.error(e);
       setError(e instanceof Error ? e.message : t('errors.unknownQuizGeneration'));
+      setProcessingDetails(null);
       setStep('options');
     }
   };
@@ -467,12 +497,14 @@ const App: React.FC = () => {
     setQuiz(null);
     setUserAnswers({});
     setCurrentQuizOptions(null);
+    setProcessingDetails(null);
   };
   const handleGenerateNewQuiz = () => {
       stopProgressSimulation();
       setStep('options');
       setQuiz(null);
       setUserAnswers({});
+      setProcessingDetails(null);
   }
   const handleSecuritySubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -530,13 +562,42 @@ const App: React.FC = () => {
   }
   const renderContent = () => {
     if (step === 'loading') {
+      const spinnerProgressIndex = (current: number, total: number) => {
+        if (total <= 1) return 1;
+        const derived = Math.max(1, Math.round((current / 100) * total));
+        return Math.min(total, derived);
+      };
+      const processingText = (() => {
+        if (!processingDetails) return loadingMessage;
+
+        if (processingDetails.type === 'images') {
+          const currentItem = spinnerProgressIndex(progress, processingDetails.totalItems);
+          return `Processing image ${currentItem} of ${processingDetails.totalItems}…`;
+        }
+
+        if (processingDetails.type === 'pdf') {
+          const currentPage = spinnerProgressIndex(progress, processingDetails.totalPages);
+          return `Processing page ${currentPage} of ${processingDetails.totalPages}…`;
+        }
+
+        if (processingDetails.type === 'docx') {
+          return 'Processing document…';
+        }
+
+        return 'Assembling your quiz…';
+      })();
+      const supportingText = processingDetails?.type === 'quiz' ? 'This might take a minute.' : null;
       return (
-        <div className="w-full max-w-lg mx-auto">
-            <div className="flex justify-between mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                <span>{loadingMessage}</span>
-                <span>{`${Math.round(progress)}%`}</span>
-            </div>
-            <ProgressBar progress={progress} />
+        <div
+          className="w-full max-w-lg mx-auto flex flex-col items-center gap-4 py-10 min-h-[240px]"
+          role="status"
+          aria-live="polite"
+        >
+          <div className="h-12 w-12 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin" aria-hidden="true"></div>
+          <div className="space-y-1 text-center">
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{processingText}</p>
+            {supportingText && <p className="text-xs text-slate-500 dark:text-slate-400">{supportingText}</p>}
+          </div>
         </div>
       );
     }
