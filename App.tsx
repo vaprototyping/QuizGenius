@@ -586,10 +586,18 @@ const App: React.FC = () => {
 
         return 'Assembling your quiz…';
       })();
+      const supportingText = processingDetails?.type === 'quiz' ? 'This might take a minute.' : null;
       return (
-        <div className="w-full max-w-lg mx-auto flex flex-col items-center gap-4 py-10" role="status" aria-live="polite">
+        <div
+          className="w-full max-w-lg mx-auto flex flex-col items-center gap-4 py-10 min-h-[240px]"
+          role="status"
+          aria-live="polite"
+        >
           <div className="h-12 w-12 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin" aria-hidden="true"></div>
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-200 text-center">{processingText}</p>
+          <div className="space-y-1 text-center">
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{processingText}</p>
+            {supportingText && <p className="text-xs text-slate-500 dark:text-slate-400">{supportingText}</p>}
+          </div>
         </div>
       );
     }
