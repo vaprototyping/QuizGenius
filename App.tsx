@@ -670,23 +670,25 @@ const App: React.FC = () => {
           <p className="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
             {t('app.description')}
           </p>
-          <div className="mt-10 text-left">
-            <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 text-center">How it works</h2>
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
-              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-800/60 shadow-sm">
-                <p className="text-base font-medium text-slate-800 dark:text-slate-100">Upload your files</p>
-                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Add documents to get started.</p>
-              </div>
-              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-800/60 shadow-sm">
-                <p className="text-base font-medium text-slate-800 dark:text-slate-100">AI extracts the text</p>
-                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Content is analyzed instantly.</p>
-              </div>
-              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-800/60 shadow-sm">
-                <p className="text-base font-medium text-slate-800 dark:text-slate-100">A quiz is generated</p>
-                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Interactive questions appear ready to use.</p>
+          {step === 'upload' && extractedText === null && (
+            <div className="mt-10 text-left">
+              <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 text-center">How it works</h2>
+              <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-4xl mx-auto">
+                <div className="p-3 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-800/60 shadow-sm">
+                  <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Upload your files</p>
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">Add documents to get started.</p>
+                </div>
+                <div className="p-3 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-800/60 shadow-sm">
+                  <p className="text-sm font-medium text-slate-800 dark:text-slate-100">AI extracts the text</p>
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">Content is analyzed instantly.</p>
+                </div>
+                <div className="p-3 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-800/60 shadow-sm">
+                  <p className="text-sm font-medium text-slate-800 dark:text-slate-100">A quiz is generated</p>
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">Interactive questions appear ready to use.</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
         <div className="max-w-4xl mx-auto flex justify-center">
           {renderContent()}
