@@ -658,6 +658,62 @@ const App: React.FC = () => {
         return <FileUpload onFileProcessed={handleFileProcessed} />;
     }
   };
+
+  const howItWorksSteps = [
+    {
+      label: 'Upload your files',
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M3 14a1 1 0 011-1h3v-3H5a1 1 0 010-2h2V5a1 1 0 112 0v3h2a1 1 0 010 2h-2v3h3a1 1 0 110 2H4a1 1 0 01-1-1z"
+            clipRule="evenodd"
+          />
+        </svg>
+      ),
+    },
+    {
+      label: 'AI extracts the text',
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 3v2m0 14v2m6.364-14.364l-1.414 1.414M6.05 17.95l-1.414 1.414M21 12h-2M5 12H3m14.364 5.364l-1.414-1.414M6.05 6.05L4.636 4.636" />
+          <circle cx="12" cy="12" r="3.5" />
+        </svg>
+      ),
+    },
+    {
+      label: 'A quiz is generated',
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M9 10h6M9 14h3M8 5h8a2 2 0 012 2v12a2 2 0 01-2 2H8a2 2 0 01-2-2V7a2 2 0 012-2z" />
+          <path d="M9 3v2M15 3v2" />
+        </svg>
+      ),
+    },
+  ];
   return (
     <div className="bg-slate-50 dark:bg-slate-900 min-h-screen text-slate-900 dark:text-slate-100 font-sans relative">
       <header className="absolute top-4 right-4 z-10">
@@ -673,20 +729,23 @@ const App: React.FC = () => {
             {t('app.description')}
           </p>
           {step === 'upload' && extractedText === null && (
-            <div className="mt-10 text-left">
-              <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 text-center">How it works</h2>
-              <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-4xl mx-auto">
-                <div className="p-3 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-800/60 shadow-sm">
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Upload your files</p>
-                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">Add documents to get started.</p>
-                </div>
-                <div className="p-3 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-800/60 shadow-sm">
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-100">AI extracts the text</p>
-                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">Content is analyzed instantly.</p>
-                </div>
-                <div className="p-3 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-800/60 shadow-sm">
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-100">A quiz is generated</p>
-                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">Interactive questions appear ready to use.</p>
+            <div className="mt-10 flex justify-center">
+              <div className="w-full max-w-xl">
+                <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 text-center">How it works</h2>
+                <div className="mt-4 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white/90 dark:bg-slate-800/70 shadow-sm px-4 py-5 sm:px-6">
+                  <div className="flex flex-col gap-3">
+                    {howItWorksSteps.map((stepItem) => (
+                      <div
+                        key={stepItem.label}
+                        className="flex items-center gap-3 text-sm sm:text-base font-medium text-slate-800 dark:text-slate-100"
+                      >
+                        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-200">
+                          {stepItem.icon}
+                        </span>
+                        <span className="flex-1 text-center sm:text-left">{stepItem.label}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
