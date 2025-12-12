@@ -14,7 +14,7 @@ import {
   Question,
   TextQuizOptions
 } from './types';
-import { SparklesIcon } from './components/icons/SparklesIcon';
+import LogoImage from './components/icons/logo.png';
 import { useI18n } from './context/i18n';
 import { generateQuiz as generateQuizAPI } from './src/lib/api';
 
@@ -666,7 +666,7 @@ const App: React.FC = () => {
       <main className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-800 dark:text-slate-200 flex items-center justify-center gap-3">
-            <SparklesIcon className="w-8 h-8 text-indigo-500" />
+            <img src={LogoImage} alt="QwitzMe.ai logo" className="w-10 h-10" />
             QwitzMe.ai
           </h1>
           <p className="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
