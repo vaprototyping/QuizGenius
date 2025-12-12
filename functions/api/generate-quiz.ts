@@ -1,7 +1,15 @@
 // functions/api/generate-quiz.ts
 export const onRequestPost: PagesFunction = async ({ request, env }) => {
   try {
-    const { text, quizType, numberOfQuestions } = await request.json();
+    const { text, quizType, numberOfQuestions, language } = await request.json();
+
+    const requestedLanguage = typeof language === "string" && language.trim() ? language.trim() : "en";
+    const languageName =
+      {
+        en: "English",
+        nl: "Dutch",
+        it: "Italian",
+      }[requestedLanguage as "en" | "nl" | "it"] ?? requestedLanguage;
 
     const requestedCount = Number(numberOfQuestions);
     const normalizedCount = Number.isFinite(requestedCount)
@@ -24,7 +32,8 @@ export const onRequestPost: PagesFunction = async ({ request, env }) => {
     const baseInstructions = `You are QuizGenius, a master educator who writes rigorous, unambiguous quizzes.
 Focus exclusively on the supplied source material. Do not invent facts that are not supported by it.
 Never format true/false items as questions — they must always be statements.
-Always include a brief explanation that teaches the key idea behind the answer.`;
+Always include a brief explanation that teaches the key idea behind the answer.
+Respond exclusively in ${languageName}, including the quiz title, description, questions, options, answers, and explanations.`;
 
     const typeInstructions = {
       mcq: `Create exactly ${normalizedCount} multiple-choice questions. Each question must have four plausible answer choices labelled as an array of strings.

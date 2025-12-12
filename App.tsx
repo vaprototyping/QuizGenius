@@ -368,7 +368,7 @@ const App: React.FC = () => {
   const [isSecurityVerified, setIsSecurityVerified] = useState(false);
   const [securityCodeInput, setSecurityCodeInput] = useState('');
   const [securityError, setSecurityError] = useState<string | null>(null);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [progress, setProgress] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState(t('loading.thinking'));
   const [processingDetails, setProcessingDetails] = useState<
@@ -467,7 +467,7 @@ const App: React.FC = () => {
     try {
       const typeForAPI = mapQuizType(options);
       const countForAPI = Math.min(15, Math.max(1, Number(options.numberOfQuestions) || 1));
-      const llmContent = await generateQuizAPI(extractedText, typeForAPI, countForAPI);
+      const llmContent = await generateQuizAPI(extractedText, typeForAPI, countForAPI, locale);
 
       const quizData: Quiz = fallbackParseToQuiz(llmContent, options);
 
