@@ -39,6 +39,7 @@
     "subjectType": "Tipo di materia",
     "documentLanguage": "Lingua del documento",
     "extractText": "Estrai testo",
+    "analyzeMaterial": "Analizza materiale",
     "useCamera": "Usa la fotocamera per scattare una foto",
     "cameraDescription": "Scatta una nuova immagine con la fotocamera del tuo telefono o tablet.",
     "multipleCount": "+{count}",

@@ -49,6 +49,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
   const { t } = useI18n();
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
+  const buttonLabel = files.length > 0 ? t('fileUpload.analyzeMaterial') : t('fileUpload.extractText');
+
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
       const selectedFiles = Array.from(event.target.files || []);
@@ -297,7 +299,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
               disabled={files.length === 0}
               className="w-full whitespace-nowrap px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-slate-400 disabled:cursor-not-allowed"
             >
-              {t('fileUpload.extractText')}
+              {buttonLabel}
             </button>
           </div>
         </div>
