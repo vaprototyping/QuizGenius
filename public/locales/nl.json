@@ -39,6 +39,7 @@
     "subjectType": "Onderwerptype",
     "documentLanguage": "Taal van het document",
     "extractText": "Tekst extraheren",
+    "analyzeMaterial": "Materiaal analyseren",
     "useCamera": "Gebruik de camera om een foto te maken",
     "cameraDescription": "Maak een nieuwe foto met de camera van uw telefoon of tablet.",
     "multipleCount": "+{count}",
