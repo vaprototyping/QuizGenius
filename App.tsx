@@ -676,11 +676,11 @@ const App: React.FC = () => {
             {t('app.description')}
           </p>
           {step === 'upload' && extractedText === null && (
-            <div className="mt-10 text-left">
+            <div className="mt-10 text-center">
               <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 text-center">How it works</h2>
               <div className="mt-5 max-w-2xl mx-auto">
                 <div className="p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white/80 dark:bg-slate-800/60 shadow-sm">
-                  <div className="flex flex-col divide-y divide-slate-200/80 dark:divide-slate-700">
+                  <div className="flex flex-col items-center divide-y divide-slate-200/80 dark:divide-slate-700">
                     {[{
                       text: 'Upload your files',
                       image: UploadStepImage,
@@ -696,14 +696,14 @@ const App: React.FC = () => {
                     }].map((stepItem, index, array) => (
                       <div
                         key={stepItem.text}
-                        className={`flex items-center gap-3 sm:gap-4 ${index > 0 ? 'pt-3 sm:pt-4' : ''} ${index < array.length - 1 ? 'pb-3 sm:pb-4' : ''}`}
+                        className={`flex items-center justify-center gap-3 sm:gap-4 ${index > 0 ? 'pt-3 sm:pt-4' : ''} ${index < array.length - 1 ? 'pb-3 sm:pb-4' : ''}`}
                       >
                         <img
                           src={stepItem.image}
                           alt={stepItem.alt}
                           className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0"
                         />
-                        <p className="text-sm sm:text-base font-medium text-slate-800 dark:text-slate-100">
+                        <p className="text-sm sm:text-base font-medium text-slate-800 dark:text-slate-100 text-center">
                           {stepItem.text}
                         </p>
                       </div>
