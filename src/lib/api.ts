@@ -3,12 +3,14 @@ export async function generateQuiz(
   ocrText: string,
   quizType: "mcq" | "true_false" | "open",
   numberOfQuestions: number,
-  language: string
+  language: string,
+  preferences: { mode: 'student' | 'parent'; subject: 'text' | 'math'; difficulty?: string; mathStyle?: string },
+  accessCode: string
 ) {
   const res = await fetch("/api/generate-quiz", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text: ocrText, quizType, numberOfQuestions, language })
+    headers: { "Content-Type": "application/json", "X-Quiz-Access-Code": accessCode },
+    body: JSON.stringify({ text: ocrText, quizType, numberOfQuestions, language, ...preferences })
   });
 
   const data = await res.json();
@@ -16,7 +18,5 @@ export async function generateQuiz(
     throw new Error(data.error || "Generation failed");
   }
 
-  // The serverless function returns OpenAI-compatible JSON.
-  // We'll return the raw content and let the caller parse/shape it.
-  return data.choices?.[0]?.message?.content ?? "";
+  return data.quiz;
 }

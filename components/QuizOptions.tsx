@@ -134,7 +134,7 @@ export const QuizOptions: React.FC<QuizOptionsProps> = ({
         {t('quizOptions.description')}
       </p>
 
-      <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md border border-slate-200 dark:border-slate-700">
+      <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-lg border border-violet-100 dark:border-slate-700">
         <div className="flex items-start gap-3">
           <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-300">
             <span className="text-xl" aria-hidden="true">✓</span>
@@ -146,7 +146,7 @@ export const QuizOptions: React.FC<QuizOptionsProps> = ({
         </div>
       </div>
 
-      <div className="mt-8 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md border border-slate-200 dark:border-slate-700">
+      <div className="mt-8 bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-lg border border-violet-100 dark:border-slate-700">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
             <label htmlFor="num-questions" className="block text-sm font-medium text-slate-700 dark:text-slate-300">

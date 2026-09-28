@@ -4,7 +4,8 @@
 import { createWorker } from "tesseract.js";
 
 // Minimal type aliases — keep your imports in App.tsx unchanged.
-import type { Language, SubjectType } from "../types";
+import { Language } from "../types";
+import type { SubjectType } from "../types";
 
 const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
@@ -58,22 +59,19 @@ function base64ToBlob(data: string, fallbackMime: string): Blob {
 export async function extractTextFromImage(
   base64Data: string,
   _mimeType: string,
-  _lang: Language,
+  lang: Language,
   _subject: SubjectType
 ): Promise<string> {
   const blob = base64ToBlob(base64Data, _mimeType);
 
-  const worker = await createWorker();
-  // Load English by default; add more with worker.loadLanguage('eng+ita') etc.
-  await worker.loadLanguage("eng");
-  await worker.initialize("eng");
-
-  const {
-    data: { text },
-  } = await worker.recognize(blob);
-
-  await worker.terminate();
-  return text?.trim() || "";
+  const language = lang === Language.Dutch ? 'nld' : lang === Language.Italian ? 'ita' : 'eng';
+  const worker = await createWorker(language);
+  try {
+    const { data: { text } } = await worker.recognize(blob);
+    return text?.trim() || "";
+  } finally {
+    await worker.terminate();
+  }
 }
 
 async function extractTextFromPdf(file: File, pageLimit = 15): Promise<string> {
@@ -109,7 +107,7 @@ async function extractTextFromPdf(file: File, pageLimit = 15): Promise<string> {
 }
 
 async function extractTextFromDocx(file: File): Promise<string> {
-  const JSZip = (await import("https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm")).default;
+  const JSZip = (await import("jszip")).default;
   const arrayBuffer = await file.arrayBuffer();
   const zip = await JSZip.loadAsync(arrayBuffer);
 

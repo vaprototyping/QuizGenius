@@ -60,7 +60,7 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
     const trueFalseOptions = ['True', 'False'];
 
     return (
-      <div key={index} className="mb-8 p-6 bg-white dark:bg-slate-800 rounded-xl shadow-md border border-slate-200 dark:border-slate-700">
+      <div key={index} className="mb-8 p-6 bg-white dark:bg-slate-800 rounded-3xl shadow-lg border border-violet-100 dark:border-slate-700">
         <div className="flex items-start">
           <span className="font-bold text-indigo-500 mr-3">{index + 1}.</span>
           <div className="flex-1">
@@ -100,7 +100,7 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
                       onChange={() => handleAnswerChange(index, option)}
                       className="h-4 w-4 text-indigo-600 border-slate-300 focus:ring-indigo-500"
                     />
-                    <span className="ml-3 text-slate-700 dark:text-slate-300">{option}</span>
+                    <span className="ml-3 text-slate-700 dark:text-slate-300">{t(`quizDisplay.${option.toLowerCase()}`)}</span>
                   </label>
                 ))}
               </div>

@@ -5,7 +5,25 @@
     "errorTitle": "Si è verificato un errore",
     "errorGeneric": "Qualcosa è andato storto.",
     "startOver": "Ricomincia",
-    "submit": "Invia Quiz"
+    "submit": "Invia Quiz",
+    "modeLabel": "Scegli come usare il quiz",
+    "studentMode": "Sto studiando",
+    "parentMode": "Aiuto un bambino",
+    "studentDescription": "Esercitati in autonomia e impara da ogni risposta.",
+    "parentDescription": "Trasforma il materiale di studio in domande da discutere insieme.",
+    "howItWorks": "Tre semplici passaggi",
+    "uploadStep": "Aggiungi il materiale di studio",
+    "extractStep": "Leggiamo il contenuto",
+    "quizStep": "Esercitati con un quiz",
+    "theme": "Tema",
+    "theme_system": "Sistema",
+    "theme_light": "Chiaro",
+    "theme_dark": "Scuro",
+    "accessPrompt": "Inserisci il codice di accesso per iniziare.",
+    "accessLabel": "Codice di accesso",
+    "continue": "Continua",
+    "invalidAccess": "Il codice non è corretto. Riprova.",
+    "accessUnavailable": "L’accesso non è temporaneamente disponibile. Riprova più tardi."
   },
   "loading": {
     "thinking": "L'IA sta pensando...",
@@ -17,7 +35,11 @@
     "crafting": "Creazione di domande pertinenti...",
     "developing": "Sviluppo delle chiavi di risposta...",
     "assembling": "Assemblaggio del tuo quiz...",
-    "quizGenerated": "Quiz generato!"
+    "quizGenerated": "Quiz generato!",
+    "processingImage": "Elaborazione immagine {current} di {total}…",
+    "processingPage": "Elaborazione pagina {current} di {total}…",
+    "processingDocument": "Elaborazione documento…",
+    "mightTakeMinute": "Potrebbe volerci un minuto."
   },
   "errors": {
     "unknownExtraction": "Si è verificato un errore sconosciuto durante l'estrazione del testo.",
@@ -29,7 +51,9 @@
     "tooManyImages": "Puoi caricare fino a 5 immagini alla volta.",
     "tooManyDocuments": "È possibile caricare un solo documento (PDF o DOCX) alla volta.",
     "singleDocumentOnly": "Un PDF o DOCX deve essere caricato da solo, senza altri file.",
-    "pdfPageLimit": "I PDF sono limitati a 15 pagine. Carica un documento più corto."
+    "pdfPageLimit": "I PDF sono limitati a 15 pagine. Carica un documento più corto.",
+    "tooLittleText": "Non siamo riusciti a leggere abbastanza testo. Prova un’immagine più nitida o un documento con testo selezionabile.",
+    "tooMuchText": "Il materiale è troppo lungo. Prova un documento più breve o meno immagini."
   },
   "fileUpload": {
     "renderingPdf": "Rendering anteprima PDF...",
@@ -61,7 +85,9 @@
   "quizDisplay": {
     "description": "Rispondi alle seguenti domande al meglio delle tue capacità.",
     "placeholder": "La tua risposta qui...",
-    "allAnswered": "Per favore, rispondi a tutte le domande prima di inviare."
+    "allAnswered": "Per favore, rispondi a tutte le domande prima di inviare.",
+    "true": "Vero",
+    "false": "Falso"
   },
   "quizResults": {
     "title": "Risultati del Quiz",
@@ -71,7 +97,8 @@
     "correctAnswer": "Risposta corretta:",
     "explanation": "Spiegazione:",
     "noAnswer": "Nessuna risposta",
-    "generateNew": "Genera nuovo quiz"
+    "generateNew": "Genera nuovo quiz",
+    "openReview": "Confronta le tue risposte con quelle suggerite qui sotto. Le risposte aperte non vengono valutate automaticamente."
   },
   "languageSelector": {
     "label": "Lingua UI"

@@ -5,7 +5,25 @@
     "errorTitle": "Er is een fout opgetreden",
     "errorGeneric": "Er is iets misgegaan.",
     "startOver": "Opnieuw beginnen",
-    "submit": "Quiz inleveren"
+    "submit": "Quiz inleveren",
+    "modeLabel": "Kies hoe je de quiz gebruikt",
+    "studentMode": "Ik ben aan het leren",
+    "parentMode": "Ik help een kind",
+    "studentDescription": "Oefen zelfstandig en leer van elk antwoord.",
+    "parentDescription": "Maak van lesmateriaal vragen die jullie samen kunnen bespreken.",
+    "howItWorks": "Drie eenvoudige stappen",
+    "uploadStep": "Voeg lesmateriaal toe",
+    "extractStep": "We lezen de inhoud",
+    "quizStep": "Oefen met een quiz",
+    "theme": "Thema",
+    "theme_system": "Systeem",
+    "theme_light": "Licht",
+    "theme_dark": "Donker",
+    "accessPrompt": "Vul je toegangscode in om te beginnen.",
+    "accessLabel": "Toegangscode",
+    "continue": "Doorgaan",
+    "invalidAccess": "Deze code werkt niet. Probeer het opnieuw.",
+    "accessUnavailable": "Toegang is tijdelijk niet beschikbaar. Probeer het later opnieuw."
   },
   "loading": {
     "thinking": "AI is aan het denken...",
@@ -17,7 +35,11 @@
     "crafting": "Inzichtelijke vragen maken...",
     "developing": "Antwoordsleutels ontwikkelen...",
     "assembling": "Uw quiz samenstellen...",
-    "quizGenerated": "Quiz gegenereerd!"
+    "quizGenerated": "Quiz gegenereerd!",
+    "processingImage": "Afbeelding {current} van {total} verwerken…",
+    "processingPage": "Pagina {current} van {total} verwerken…",
+    "processingDocument": "Document verwerken…",
+    "mightTakeMinute": "Dit kan even duren."
   },
   "errors": {
     "unknownExtraction": "Er is een onbekende fout opgetreden tijdens het extraheren van de tekst.",
@@ -29,7 +51,9 @@
     "tooManyImages": "Je kunt maximaal 5 afbeeldingen tegelijk uploaden.",
     "tooManyDocuments": "Er kan slechts één document (PDF of DOCX) tegelijk worden geüpload.",
     "singleDocumentOnly": "Een PDF of DOCX moet alleen worden geüpload, zonder andere bestanden.",
-    "pdfPageLimit": "PDF's zijn beperkt tot 15 pagina's. Upload een korter document."
+    "pdfPageLimit": "PDF's zijn beperkt tot 15 pagina's. Upload een korter document.",
+    "tooLittleText": "We konden niet genoeg tekst lezen. Probeer een duidelijkere afbeelding of een document met selecteerbare tekst.",
+    "tooMuchText": "Dit materiaal is te lang. Probeer een korter document of minder afbeeldingen."
   },
   "fileUpload": {
     "renderingPdf": "PDF-voorbeeld renderen...",
@@ -61,7 +85,9 @@
   "quizDisplay": {
     "description": "Beantwoord de volgende vragen naar uw beste vermogen.",
     "placeholder": "Uw antwoord hier...",
-    "allAnswered": "Beantwoord alle vragen voordat u indient."
+    "allAnswered": "Beantwoord alle vragen voordat u indient.",
+    "true": "Waar",
+    "false": "Niet waar"
   },
   "quizResults": {
     "title": "Quizresultaten",
@@ -71,7 +97,8 @@
     "correctAnswer": "Correct antwoord:",
     "explanation": "Uitleg:",
     "noAnswer": "Geen antwoord",
-    "generateNew": "Nieuwe quiz genereren"
+    "generateNew": "Nieuwe quiz genereren",
+    "openReview": "Vergelijk je antwoorden met de voorbeeldantwoorden hieronder. Open antwoorden worden niet automatisch beoordeeld."
   },
   "languageSelector": {
     "label": "UI Taal"

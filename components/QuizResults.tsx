@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect } from 'react';
-import { Quiz, Question, SubjectType } from '../types';
+import { Quiz, Question, SubjectType, QuizType } from '../types';
 import { RestartIcon } from './icons/RestartIcon';
 import { EditIcon } from './icons/EditIcon';
 import MathText from './MathText';
@@ -52,20 +52,23 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ quiz, userAnswers, onR
   const { score, correctAnswers } = useMemo(() => {
     let correct = 0;
     quiz.questions.forEach((q, index) => {
+        if (q.type === QuizType.Open) return;
         if (isAnswerCorrect(userAnswers[index], q.answer, subjectType)) {
             correct++;
         }
     });
-    const scorePercentage = quiz.questions.length > 0 ? (correct / quiz.questions.length) * 100 : 0;
+    const scoredQuestions = quiz.questions.filter(q => q.type !== QuizType.Open).length;
+    const scorePercentage = scoredQuestions > 0 ? (correct / scoredQuestions) * 100 : 0;
     return { score: Math.round(scorePercentage), correctAnswers: correct };
   }, [quiz, userAnswers, subjectType]);
 
   const renderResult = (question: Question, index: number) => {
     const userAnswer = userAnswers[index] || t('quizResults.noAnswer');
     const isCorrect = isAnswerCorrect(userAnswer, question.answer, subjectType);
+    const requiresReview = question.type === QuizType.Open;
     
-    const resultColor = isCorrect ? 'border-green-500 dark:border-green-400' : 'border-red-500 dark:border-red-400';
-    const resultBg = isCorrect ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20';
+    const resultColor = requiresReview ? 'border-violet-500' : isCorrect ? 'border-green-500 dark:border-green-400' : 'border-red-500 dark:border-red-400';
+    const resultBg = requiresReview ? 'bg-violet-50 dark:bg-violet-900/20' : isCorrect ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20';
     
     return (
       <div key={index} className={`mb-6 p-5 rounded-xl border-l-4 ${resultColor} ${resultBg}`}>
@@ -78,14 +81,14 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ quiz, userAnswers, onR
             <div className={`p-3 rounded-md ${isCorrect ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
                 <p className="font-medium text-slate-600 dark:text-slate-400">{t('quizResults.yourAnswer')}</p>
                 <p className="text-slate-800 dark:text-slate-200">
-                    {subjectType === SubjectType.Math ? <MathText text={userAnswer} /> : userAnswer}
+                      {question.type === QuizType.TrueFalse ? t(`quizDisplay.${userAnswer.toLowerCase()}`) : subjectType === SubjectType.Math ? <MathText text={userAnswer} /> : userAnswer}
                 </p>
             </div>
-            {!isCorrect && (
+            {(requiresReview || !isCorrect) && (
                 <div className="p-3 rounded-md bg-green-100 dark:bg-green-900/30">
                     <p className="font-medium text-slate-600 dark:text-slate-400">{t('quizResults.correctAnswer')}</p>
                     <p className="text-slate-800 dark:text-slate-200">
-                      {subjectType === SubjectType.Math ? <MathText text={question.answer} /> : question.answer}
+                      {question.type === QuizType.TrueFalse ? t(`quizDisplay.${question.answer.toLowerCase()}`) : subjectType === SubjectType.Math ? <MathText text={question.answer} /> : question.answer}
                     </p>
                 </div>
             )}
@@ -105,9 +108,11 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ quiz, userAnswers, onR
       <div className="text-center mb-10">
         <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-200">{t('quizResults.title')}</h2>
         <div className="mt-4">
-            <p className="text-lg text-slate-600 dark:text-slate-400">{t('quizResults.youScored')}</p>
-            <p className={`text-6xl font-extrabold ${getScoreColor(score)}`}>{score}%</p>
-            <p className="text-lg text-slate-600 dark:text-slate-400">{t('quizResults.scoreOutOf', { correct: correctAnswers, total: quiz.questions.length })}</p>
+            {quiz.questions.some(q => q.type === QuizType.Open) ? <p className="max-w-xl mx-auto text-slate-600 dark:text-slate-300">{t('quizResults.openReview')}</p> : <>
+              <p className="text-lg text-slate-600 dark:text-slate-400">{t('quizResults.youScored')}</p>
+              <p className={`text-6xl font-extrabold ${getScoreColor(score)}`}>{score}%</p>
+              <p className="text-lg text-slate-600 dark:text-slate-400">{t('quizResults.scoreOutOf', { correct: correctAnswers, total: quiz.questions.length })}</p>
+            </>}
         </div>
       </div>
 

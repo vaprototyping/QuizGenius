@@ -5,7 +5,25 @@
     "errorTitle": "An Error Occurred",
     "errorGeneric": "Something went wrong.",
     "startOver": "Start Over",
-    "submit": "Submit Quiz"
+    "submit": "Submit Quiz",
+    "modeLabel": "Choose how you will use the quiz",
+    "studentMode": "I am studying",
+    "parentMode": "I am helping a child",
+    "studentDescription": "Practice independently and learn from every answer.",
+    "parentDescription": "Turn study material into questions you can discuss together.",
+    "howItWorks": "Three simple steps",
+    "uploadStep": "Add study material",
+    "extractStep": "We read the content",
+    "quizStep": "Practice with a quiz",
+    "theme": "Theme",
+    "theme_system": "System",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "accessPrompt": "Enter your access code to start practicing.",
+    "accessLabel": "Access code",
+    "continue": "Continue",
+    "invalidAccess": "That code did not work. Try again.",
+    "accessUnavailable": "Access is temporarily unavailable. Please try again later."
   },
   "loading": {
     "thinking": "AI is thinking...",
@@ -17,7 +35,11 @@
     "crafting": "Crafting insightful questions...",
     "developing": "Developing answer keys...",
     "assembling": "Assembling your quiz...",
-    "quizGenerated": "Quiz generated!"
+    "quizGenerated": "Quiz generated!",
+    "processingImage": "Processing image {current} of {total}…",
+    "processingPage": "Processing page {current} of {total}…",
+    "processingDocument": "Processing document…",
+    "mightTakeMinute": "This might take a minute."
   },
   "errors": {
     "unknownExtraction": "An unknown error occurred during text extraction.",
@@ -29,7 +51,9 @@
     "tooManyImages": "You can upload up to 5 images at a time.",
     "tooManyDocuments": "Only one document (PDF or DOCX) can be uploaded at once.",
     "singleDocumentOnly": "A PDF or DOCX must be uploaded alone, not with other files.",
-    "pdfPageLimit": "PDFs are limited to 15 pages. Please upload a shorter document."
+    "pdfPageLimit": "PDFs are limited to 15 pages. Please upload a shorter document.",
+    "tooLittleText": "We could not read enough text. Try a clearer image or a document with selectable text.",
+    "tooMuchText": "This material is too long. Try a shorter document or fewer images."
   },
   "fileUpload": {
     "renderingPdf": "Rendering PDF preview...",
@@ -61,7 +85,9 @@
   "quizDisplay": {
     "description": "Answer the following questions to the best of your ability.",
     "placeholder": "Your answer here...",
-    "allAnswered": "Please answer all questions before submitting."
+    "allAnswered": "Please answer all questions before submitting.",
+    "true": "True",
+    "false": "False"
   },
   "quizResults": {
     "title": "Quiz Results",
@@ -71,7 +97,8 @@
     "correctAnswer": "Correct Answer:",
     "explanation": "Explanation:",
     "noAnswer": "No Answer",
-    "generateNew": "Generate New Quiz"
+    "generateNew": "Generate New Quiz",
+    "openReview": "Review your answers with the model answers below. Open responses are not scored automatically."
   },
   "languageSelector": {
     "label": "UI Language"

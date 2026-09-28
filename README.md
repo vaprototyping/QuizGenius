@@ -18,11 +18,23 @@ View your app in AI Studio: https://ai.studio/apps/drive/1nepcrLpqlK4VzU9UHmQPth
 2. Run the app:
    `npm run dev`
 
-## Configure the DeepSeek API key
+## Configure server secrets (Cloudflare Pages)
 
-Quiz generation requires a valid `DEEPSEEK_API_KEY` available to the Cloudflare Pages Function:
+Set these in the Cloudflare Pages project settings, for both Production and Preview environments where needed:
 
-- **Cloudflare Pages:** In your project settings, add an environment variable named `DEEPSEEK_API_KEY` with your key value and redeploy. The function reads it from the Pages runtime `env` object.
-- **Local development:** Export `DEEPSEEK_API_KEY` in your shell before running `npm run dev` (the function falls back to `process.env`).
+| Variable | Purpose |
+| --- | --- |
+| `QUIZ_ACCESS_CODE` | Shared MVP access code. Required. Set a new private value; never put it in the repository. |
+| `DEEPSEEK_API_KEY` | Primary quiz provider. |
+| `OPENROUTER_API_KEY` | Backup provider, used when the primary fails or returns an invalid quiz. |
+| `OPENROUTER_MODEL` | Optional backup model ID; defaults to `openai/gpt-4o-mini`. |
+
+At least one provider key is required. Redeploy after setting the variables. Do not expose them with the `VITE_` prefix. The browser sends the entered access code to the server; the server checks it for both access verification and quiz generation.
+
+This shared code is a temporary invitation gate. It is not an account system or a usage cap. Anyone with the code can generate unlimited quizzes, so keep provider spending limits in place until quotas are implemented.
+
+The app accepts up to five images or one PDF/DOCX. Images use browser OCR in the selected source language; PDFs need selectable text (scanned PDFs are not OCRed). Generated quizzes use the selected interface language. Open answers are reviewed against model answers without an automatic percentage score.
+
+For local end-to-end testing of Pages Functions, use the Cloudflare Pages development runtime with the secrets configured locally. Plain `vite` serves the UI only and does not implement `/api/*`.
 
 If the key is missing or blank, the app returns the configuration error shown in the quiz screen.

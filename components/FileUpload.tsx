@@ -53,7 +53,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
 
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
-      const selectedFiles = Array.from(event.target.files || []);
+      const selectedFiles: File[] = Array.from(event.target.files || []);
 
       if (selectedFiles.length === 0) {
         setFiles([]);
@@ -181,7 +181,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
     <div className="flex flex-col items-center w-full">
       <label
         htmlFor="file-upload"
-        className="w-full h-64 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg flex flex-col items-center justify-center cursor-pointer bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-700/70 transition-colors shadow-inner"
+        className="w-full h-64 border-2 border-dashed border-violet-300 dark:border-violet-600 rounded-3xl flex flex-col items-center justify-center cursor-pointer bg-white/80 dark:bg-slate-800/70 hover:bg-violet-50 dark:hover:bg-slate-700/70 transition-colors shadow-lg shadow-violet-100/50 dark:shadow-none"
       >
         {preview ? (
           preview === 'pdf' ? (
@@ -213,7 +213,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
             <p className="text-sm text-slate-500 dark:text-slate-400">
               <span className="font-semibold text-indigo-500">{t('fileUpload.clickToUpload')}</span> {t('fileUpload.dragAndDrop')}
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Images: JPG/PNG (max 5) · PDF/DOCX (max 15 pages)</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{t('fileUpload.fileTypes')}</p>
           </div>
         )}
       </label>
@@ -285,7 +285,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
                 onChange={(e) => setLanguage(e.target.value as Language)}
                 className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
               >
-                {Object.values(Language).map((lang) => (
+                {[Language.English, Language.Dutch, Language.Italian].map((lang) => (
                   <option key={lang} value={lang}>
                     {lang}
                   </option>

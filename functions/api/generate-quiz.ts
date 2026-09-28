@@ -1,119 +1,76 @@
-// functions/api/generate-quiz.ts
-export const onRequestPost: PagesFunction = async ({ request, env }) => {
-  try {
-    const { text, quizType, numberOfQuestions, language } = await request.json();
+type QuizType = 'mcq' | 'true_false' | 'open';
+type Locale = 'en' | 'nl' | 'it';
+interface Env { DEEPSEEK_API_KEY?: string; OPENROUTER_API_KEY?: string; OPENROUTER_MODEL?: string; QUIZ_ACCESS_CODE?: string }
+type PagesFunction<T> = (context: { request: Request; env: T }) => Promise<Response>;
+const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
+  status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
+});
 
-    const requestedLanguage = typeof language === "string" && language.trim() ? language.trim() : "en";
-    const languageName =
-      {
-        en: "English",
-        nl: "Dutch",
-        it: "Italian",
-      }[requestedLanguage as "en" | "nl" | "it"] ?? requestedLanguage;
-
-    const requestedCount = Number(numberOfQuestions);
-    const normalizedCount = Number.isFinite(requestedCount)
-      ? Math.min(15, Math.max(1, requestedCount))
-      : 5;
-
-    const apiKey =
-      env?.DEEPSEEK_API_KEY ??
-      (typeof process !== "undefined" ? process.env?.DEEPSEEK_API_KEY : undefined);
-    if (!apiKey || typeof apiKey !== "string" || !apiKey.trim()) {
-      return new Response(
-        JSON.stringify({
-          error:
-            "Quiz generation is not configured. Please set a valid DEEPSEEK_API_KEY for this deployment (including Preview branches).",
-        }),
-        { status: 500 }
-      );
-    }
-
-    const baseInstructions = `You are QuizGenius, a master educator who writes rigorous, unambiguous quizzes.
-Focus exclusively on the supplied source material. Do not invent facts that are not supported by it.
-Never format true/false items as questions — they must always be statements.
-Always include a brief explanation that teaches the key idea behind the answer.
-Respond exclusively in ${languageName}, including the quiz title, description, questions, options, answers, and explanations.`;
-
-    const typeInstructions = {
-      mcq: `Create exactly ${normalizedCount} multiple-choice questions. Each question must have four plausible answer choices labelled as an array of strings.
-Ensure only one option is correct and the remaining options are credible distractors drawn from the context.`,
-      true_false: `Create exactly ${normalizedCount} declarative true/false statements.
-Each must be a clear factual claim drawn strictly from the source material.
-Do NOT phrase statements as questions — no question marks, no question-like forms, and no "Is it true that..." or similar patterns.
-Include a mix of accurate statements and plausible misconceptions.
-Each item must include an "answer" field set to either "True" or "False".`,
-      open: `Create exactly ${normalizedCount} short-answer questions that require a concise response (1-3 sentences or a specific fact).
-Answers should still be grounded in the context.`,
-    }[quizType as "mcq" | "true_false" | "open"] ?? "";
-
-    const formatInstructions = `Respond in valid JSON inside a markdown fenced code block labelled json.
-Schema:
-\n\n\n{
-  "quiz": {
-    "title": string,
-    "description": string,
-    "questions": [
-      {
-        "question": string,
-        "options"?: string[],
-        "answer": string,
-        "explanation": string
-      }
-    ]
+function parseQuiz(content: string, type: QuizType, count: number) {
+  const data = JSON.parse(content.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, ''));
+  const quiz = data.quiz ?? data;
+  if (typeof quiz?.title !== 'string' || !Array.isArray(quiz.questions) || quiz.questions.length !== count)
+    throw new Error('Invalid quiz structure or count.');
+  for (const question of quiz.questions) {
+    if (typeof question.question !== 'string' || !question.question.trim() ||
+        typeof question.answer !== 'string' || !question.answer.trim() ||
+        typeof question.explanation !== 'string' || !question.explanation.trim())
+      throw new Error('Missing question, answer, or explanation.');
+    if (type === 'mcq' && (!Array.isArray(question.options) || question.options.length !== 4 ||
+        question.options.some((value: unknown) => typeof value !== 'string' || !value.trim()) ||
+        new Set(question.options.map((value: string) => value.trim().toLowerCase())).size !== 4 ||
+        !question.options.some((value: string) => value.trim() === question.answer.trim())))
+      throw new Error('Invalid multiple choice options or answer.');
+    if (type === 'true_false' && !['True', 'False'].includes(question.answer))
+      throw new Error('Invalid true/false answer.');
   }
+  return quiz;
 }
-\n\n\nKeep explanations concise (1-2 sentences). Use markdown only inside explanations if it aids clarity.`;
 
-    const prompt = `Quiz type: ${quizType}\n\n${typeInstructions}\n\nSource material:\n"""\n${text}\n"""`;
+async function generate(url: string, key: string, model: string, messages: unknown[]) {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model, messages, temperature: 0.25, max_tokens: 4000, response_format: { type: 'json_object' } }),
+    signal: AbortSignal.timeout(45000),
+  });
+  if (!response.ok) throw new Error(`Provider returned ${response.status}`);
+  const body: any = await response.json();
+  const content = body?.choices?.[0]?.message?.content;
+  if (typeof content !== 'string') throw new Error('Provider returned no content.');
+  return content;
+}
 
-    const r = await fetch("https://api.deepseek.com/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "deepseek-chat",
-        messages: [
-          { role: "system", content: baseInstructions },
-          { role: "user", content: `${prompt}\n\n${formatInstructions}` }
-        ],
-        temperature: 0.25,
-        max_tokens: 1200
-      })
-    });
-
-    if (!r.ok) {
-      const rawError = await r.text();
-      let normalizedMessage = rawError;
-
-      try {
-        const parsed = JSON.parse(rawError);
-        normalizedMessage =
-          parsed?.error?.message || parsed?.message || parsed?.error || JSON.stringify(parsed);
-      } catch (_) {
-        // leave normalizedMessage as rawError when parsing fails
-      }
-
-      const userMessage =
-        r.status === 401 || r.status === 403
-          ? "Quiz generation request was rejected. Please verify the server API key configuration."
-          : "Quiz generation failed while contacting the AI service.";
-
-      return new Response(
-        JSON.stringify({
-          error: normalizedMessage ? `${userMessage} (${normalizedMessage})` : userMessage,
-        }),
-        { status: r.status === 401 || r.status === 403 ? 401 : 500 }
-      );
+export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+  if (!env.QUIZ_ACCESS_CODE?.trim()) return json({ error: 'Access is not configured.' }, 503);
+  if (request.headers.get('X-Quiz-Access-Code') !== env.QUIZ_ACCESS_CODE.trim())
+    return json({ error: 'Incorrect access code.' }, 401);
+  let input: any;
+  try { input = await request.json(); } catch { return json({ error: 'Invalid request.' }, 400); }
+  const { text, numberOfQuestions: count, quizType: type, language } = input ?? {};
+  if (typeof text !== 'string' || text.trim().length < 50 || text.length > 24000 ||
+      !Number.isInteger(count) || count < 1 || count > 15 ||
+      !['mcq', 'true_false', 'open'].includes(type) || !['en', 'nl', 'it'].includes(language))
+    return json({ error: 'Please provide 50 to 24,000 characters of study material and valid quiz options.' }, 400);
+  const mode = input.mode === 'parent' ? 'parent' : 'student';
+  const subject = input.subject === 'math' ? 'math' : 'text';
+  const difficulty = ['Easy', 'Medium', 'Hard'].includes(input.difficulty) ? input.difficulty : 'Medium';
+  const mathStyle = input.mathStyle === 'ApplicationProblems' ? 'application problems' : 'similar exercises';
+  const languageName = ({ en: 'English', nl: 'Dutch', it: 'Italian' } as const)[language as Locale];
+  const instructions = `Create an accurate study quiz grounded in the source. Respond ONLY with JSON: {"quiz":{"title":"...","questions":[{"question":"...","options":["..."],"answer":"...","explanation":"..."}]}}. Exactly ${count} questions. All visible prose in ${languageName}, except true/false answer values, which must be exactly "True" or "False". No unsupported facts. Every answer needs a concise teaching explanation. ${mode === 'parent' ? 'Use wording suitable for a parent to discuss with a child.' : 'Write for a student practicing independently.'} ${subject === 'math' ? `Create ${mathStyle} at ${difficulty.toLowerCase()} difficulty. Check mathematical answers carefully.` : ''} ${type === 'mcq' ? 'Each question needs exactly four distinct options and exactly one correct answer that matches an option verbatim.' : type === 'true_false' ? 'Use declarative statements, a mix of true and false. No options. Answer exactly True or False.' : 'Short-answer questions with concise model answers. No options.'}`;
+  const messages = [{ role: 'system', content: instructions }, { role: 'user', content: `Source material:\n${text.trim()}` }];
+  const providers = [
+    env.DEEPSEEK_API_KEY?.trim() && { url: 'https://api.deepseek.com/chat/completions', key: env.DEEPSEEK_API_KEY.trim(), model: 'deepseek-chat' },
+    env.OPENROUTER_API_KEY?.trim() && { url: 'https://openrouter.ai/api/v1/chat/completions', key: env.OPENROUTER_API_KEY.trim(), model: env.OPENROUTER_MODEL?.trim() || 'openai/gpt-4o-mini' },
+  ].filter(Boolean) as { url: string; key: string; model: string }[];
+  if (!providers.length) return json({ error: 'Quiz generation is not configured.' }, 503);
+  for (const provider of providers) {
+    try {
+      const content = await generate(provider.url, provider.key, provider.model, messages);
+      return json({ quiz: parseQuiz(content, type, count) });
+    } catch (error) {
+      console.error('Quiz provider failed:', provider.url, error instanceof Error ? error.message : error);
     }
-
-    const data = await r.json();
-    return new Response(JSON.stringify(data), {
-      headers: { "Content-Type": "application/json" }
-    });
-  } catch (e: any) {
-    return new Response(JSON.stringify({ error: e?.message || "Unknown error" }), { status: 500 });
   }
+  return json({ error: 'We could not create a reliable quiz right now. Please try again.' }, 502);
 };
