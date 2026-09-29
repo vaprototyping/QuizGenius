@@ -211,5 +211,24 @@
     "music": "Muziek",
     "health": "Gezondheid",
     "other": "Anders"
+  },
+  "generationErrors": {
+    "title": "De quiz kon niet worden gemaakt",
+    "details": "Wat is er gebeurd?",
+    "reference": "Referentie-ID",
+    "noFallback": "De OpenRouter-reserveoptie is niet ingesteld voor deze versie.",
+    "credits_exhausted": "Het tegoed van de AI-dienst is op. Controleer het saldo of stel de reserveoptie in.",
+    "rate_limited": "De AI-dienst ontvangt te veel verzoeken. Probeer het zo opnieuw.",
+    "authentication": "De AI-dienst heeft de ingestelde API-sleutel geweigerd. De beheerder moet de serverinstellingen controleren.",
+    "request_rejected": "De AI-dienst heeft het verzoek geweigerd. De beheerder moet de modelinstellingen controleren.",
+    "timeout": "De AI-dienst deed er te lang over. Probeer het opnieuw.",
+    "provider_unavailable": "De AI-dienst is tijdelijk niet beschikbaar. Probeer het opnieuw.",
+    "network": "De quizserver kon de AI-dienst niet bereiken. Probeer het opnieuw.",
+    "invalid_response": "De AI maakte een quiz die niet door de controle kwam. Probeer het opnieuw of kies minder vragen.",
+    "output_truncated": "Het antwoord van de AI was onvolledig. Kies minder vragen.",
+    "providers_failed": "De AI-diensten faalden om verschillende redenen. Open hieronder de details.",
+    "not_configured": "Er is geen AI-dienst ingesteld voor quizzen. De beheerder moet een sleutel toevoegen.",
+    "invalid_server_response": "De quizserver gaf een onleesbaar antwoord. Probeer het opnieuw.",
+    "unknown": "Het maken van de quiz is onverwacht mislukt. Probeer het opnieuw."
   }
 }

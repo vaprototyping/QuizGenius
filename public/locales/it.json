@@ -211,5 +211,24 @@
     "music": "Musica",
     "health": "Educazione alla salute",
     "other": "Altro"
+  },
+  "generationErrors": {
+    "title": "Impossibile completare il quiz",
+    "details": "Che cosa è successo?",
+    "reference": "ID di riferimento",
+    "noFallback": "Il servizio alternativo OpenRouter non è configurato per questa versione.",
+    "credits_exhausted": "Il credito del servizio AI è esaurito. Controlla il saldo o configura il servizio alternativo.",
+    "rate_limited": "Il servizio AI riceve troppe richieste. Riprova tra poco.",
+    "authentication": "Il servizio AI ha rifiutato la chiave API. Il gestore deve controllare le impostazioni del server.",
+    "request_rejected": "Il servizio AI ha rifiutato la richiesta. Il gestore deve controllare la configurazione del modello.",
+    "timeout": "Il servizio AI ha impiegato troppo tempo a rispondere. Riprova.",
+    "provider_unavailable": "Il servizio AI è temporaneamente non disponibile. Riprova.",
+    "network": "Il server del quiz non riesce a raggiungere il servizio AI. Riprova.",
+    "invalid_response": "L’AI ha creato un quiz che non ha superato la verifica. Riprova o scegli meno domande.",
+    "output_truncated": "La risposta dell’AI è incompleta. Scegli meno domande.",
+    "providers_failed": "I servizi AI hanno fallito per motivi diversi. Apri i dettagli qui sotto.",
+    "not_configured": "Nessun servizio AI è configurato per i quiz. Il gestore deve aggiungere una chiave.",
+    "invalid_server_response": "Il server del quiz ha restituito una risposta illeggibile. Riprova.",
+    "unknown": "La generazione del quiz è fallita inaspettatamente. Riprova."
   }
 }

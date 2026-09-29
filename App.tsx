@@ -17,7 +17,7 @@ import {
   TextQuizOptions
 } from './types';
 import { useI18n } from './context/i18n';
-import { generateQuiz as generateQuizAPI } from './src/lib/api';
+import { generateQuiz as generateQuizAPI, QuizApiError } from './src/lib/api';
 
 function mapQuizType(opts: QuizOptions): "mcq" | "true_false" | "open" {
   const raw =
@@ -32,6 +32,7 @@ function mapQuizType(opts: QuizOptions): "mcq" | "true_false" | "open" {
 const App: React.FC = () => {
   const [step, setStep] = useState<'upload' | 'options' | 'quiz' | 'results' | 'loading'>('upload');
   const [error, setError] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<QuizApiError | null>(null);
   const [extractedText, setExtractedText] = useState<string | null>(null);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
@@ -101,6 +102,7 @@ const App: React.FC = () => {
     setStep('loading');
     setUploadedFiles(selectedFiles);
     setError(null);
+    setErrorDetails(null);
     setLanguage(lang);
     setSubjectType(subject);
     setStudySubject(selectedSubject);
@@ -148,6 +150,7 @@ const App: React.FC = () => {
     if (!extractedText) return;
     setStep('loading');
     setError(null);
+    setErrorDetails(null);
     setCurrentQuizOptions(options);
     setProcessingDetails({ type: 'quiz' });
     startProgressSimulation([
@@ -191,7 +194,13 @@ const App: React.FC = () => {
         setAccessInput('');
         setAccessError(t('app.invalidAccess'));
       }
-      setError(e instanceof Error ? e.message : t('errors.unknownQuizGeneration'));
+      if (e instanceof QuizApiError) {
+        setErrorDetails(e);
+        const key = `generationErrors.${e.code}`;
+        setError(t(key) === key ? e.message : t(key));
+      } else {
+        setError(t('generationErrors.unknown'));
+      }
       setProcessingDetails(null);
       setStep('options');
     }
@@ -205,6 +214,7 @@ const App: React.FC = () => {
     stopProgressSimulation();
     setStep('upload');
     setError(null);
+    setErrorDetails(null);
     setExtractedText(null);
     setUploadedFiles([]);
     setStudySubject('');
@@ -280,7 +290,7 @@ const App: React.FC = () => {
         </div>
       );
     }
-    const errorMessage = error && <div role="alert" className="flow-error"><strong>{step === 'upload' ? t('errors.photoHelpTitle') : t('app.errorTitle')}</strong><p>{error}</p></div>;
+    const errorMessage = error && <div role="alert" className="flow-error"><strong>{step === 'upload' ? t('errors.photoHelpTitle') : t('generationErrors.title')}</strong><p>{error}</p>{errorDetails && <details className="generation-diagnostics"><summary>{t('generationErrors.details')}</summary><ul>{errorDetails.attempts.map((attempt, index) => <li key={`${attempt.provider}-${index}`}><strong>{attempt.provider}</strong>: {t(`generationErrors.${attempt.code}`)}{attempt.status ? ` (HTTP ${attempt.status})` : ''}</li>)}</ul>{errorDetails.fallbackConfigured === false && <p>{t('generationErrors.noFallback')}</p>}{errorDetails.requestId && <p>{t('generationErrors.reference')}: <code>{errorDetails.requestId}</code></p>}</details>}</div>;
     switch (step) {
       case 'upload':
         return <>{errorMessage}<FileUpload initialFiles={uploadedFiles} initialLanguage={language} initialFocus={subjectType} initialStudySubject={studySubject} initialCustomSubject={customSubject} onMaterialChange={() => setError(null)} onFileProcessed={handleFileProcessed} onTextProcessed={handleTextProcessed} /></>;
