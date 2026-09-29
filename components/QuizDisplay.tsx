@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Quiz, Question, QuizType, SubjectType } from '../types';
 import MathText from './MathText';
 import { useI18n } from '../context/i18n';
@@ -13,6 +13,7 @@ interface QuizDisplayProps {
 
 export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, setUserAnswers, onSubmit, subjectType }) => {
   const { t } = useI18n();
+  const [current, setCurrent] = useState(0);
 
   const isTrueFalseQuestion = (question: Question) => {
     const normalizedType = typeof question.type === 'string' ? question.type.toLowerCase().replace(/[-_\s]/g, '') : '';
@@ -130,18 +131,11 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
         {t('quizDisplay.description')}
       </p>
 
-      <div>{quiz.questions.map(renderQuestion)}</div>
+      <div className="question-progress"><span>{t('quizDisplay.questionOf', {current: current + 1, total: quiz.questions.length})}</span><span>{Math.round((current / quiz.questions.length) * 100)}%</span></div><div className="progress-track"><span style={{width: `${((current + 1) / quiz.questions.length) * 100}%`}} /></div>
+      <div>{renderQuestion(quiz.questions[current], current)}</div>
 
-      <div className="mt-8 text-center">
-        <button
-          onClick={onSubmit}
-          disabled={!allQuestionsAnswered}
-          className="w-full sm:w-auto px-12 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed"
-        >
-          {t('app.submit')}
-        </button>
-        {!allQuestionsAnswered && <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{t('quizDisplay.allAnswered')}</p>}
-      </div>
+      <div className="quiz-navigation"><button type="button" className="secondary-button" onClick={() => { setCurrent(c => Math.max(0,c-1)); window.scrollTo({top:0,behavior:'smooth'}); }} disabled={current === 0}>{t('quizDisplay.previous')}</button>{current < quiz.questions.length - 1 ? <button type="button" className="primary-button" onClick={() => { setCurrent(c => c+1); window.scrollTo({top:0,behavior:'smooth'}); }} disabled={!userAnswers[current]?.trim()}>{t('quizDisplay.next')} →</button> : <button type="button" className="primary-button" onClick={onSubmit} disabled={!allQuestionsAnswered}>{t('app.submit')} →</button>}</div>
+      {current === quiz.questions.length - 1 && !allQuestionsAnswered && <p className="answer-hint">{t('quizDisplay.allAnswered')}</p>}
     </div>
   );
 };

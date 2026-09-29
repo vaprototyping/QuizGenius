@@ -23,7 +23,27 @@
     "accessLabel": "Toegangscode",
     "continue": "Doorgaan",
     "invalidAccess": "Deze code werkt niet. Probeer het opnieuw.",
-    "accessUnavailable": "Toegang is tijdelijk niet beschikbaar. Probeer het later opnieuw."
+    "accessUnavailable": "Toegang is tijdelijk niet beschikbaar. Probeer het later opnieuw.",
+    "eyebrow": "JOUW STUDIEMAATJE",
+    "heroTitle": "Van leerstof naar “ik kan dit.”",
+    "heroCopy": "Upload je aantekeningen, oefen met een quiz op maat en leer van elk antwoord. Voor leerlingen en ouders die helpen.",
+    "addNotes": "Leerstof toevoegen",
+    "takeQuiz": "Oefenen",
+    "learnWhy": "Begrijpen",
+    "sampleLabel": "EEN VOORPROEFJE",
+    "sampleQuestion": "Wat helpt je om de leerstof te onthouden?",
+    "sampleAnswerA": "Nog eens lezen",
+    "sampleAnswerB": "Proberen het zelf op te halen",
+    "readyTitle": "Klaar om te beginnen?",
+    "accessNote": "Met je toegangscode open je de preview.",
+    "switchLight": "Naar lichte modus",
+    "switchDark": "Naar donkere modus",
+    "progressLabel": "Voortgang van de quiz",
+    "setUp": "Instellen",
+    "review": "Nakijken",
+    "workspaceTitle": "Wat gaan we vandaag leren?",
+    "workspaceCopy": "Begin met een foto of document van je leerstof. Wij maken er een quiz van.",
+    "footer": "Voor nieuwsgierige geesten ✳"
   },
   "loading": {
     "thinking": "AI is aan het denken...",
@@ -68,7 +88,15 @@
     "cameraDescription": "Maak een nieuwe foto met de camera van uw telefoon of tablet.",
     "multipleCount": "+{count}",
     "multipleFiles": "{count} bestanden geselecteerd",
-    "docxReady": "DOCX geselecteerd en klaar"
+    "docxReady": "DOCX geselecteerd en klaar",
+    "yourMaterial": "STAP 01 · JOUW LEERSTOF",
+    "title": "Voeg je aantekeningen toe",
+    "subtitle": "Een foto, pdf of document is prima.",
+    "uploadTab": "Uploaden of fotograferen",
+    "pasteTab": "Tekst plakken",
+    "pasteLabel": "Plak je leerstof",
+    "pastePlaceholder": "Plak hier de les, aantekeningen of het hoofdstuk…",
+    "pasteHint": "Minimaal 50, maximaal 24.000 tekens."
   },
   "quizOptions": {
     "title": "Pas uw quiz aan",
@@ -87,7 +115,10 @@
     "placeholder": "Uw antwoord hier...",
     "allAnswered": "Beantwoord alle vragen voordat u indient.",
     "true": "Waar",
-    "false": "Niet waar"
+    "false": "Niet waar",
+    "questionOf": "Vraag {current} van {total}",
+    "previous": "Vorige",
+    "next": "Volgende vraag"
   },
   "quizResults": {
     "title": "Quizresultaten",

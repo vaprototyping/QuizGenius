@@ -1,29 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { useI18n } from '../context/i18n';
 
-type Theme = 'system' | 'light' | 'dark';
-
 export const ThemeSelector: React.FC = () => {
   const { t } = useI18n();
-  const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('quizgenius-theme');
-    return saved === 'light' || saved === 'dark' ? saved : 'system';
-  });
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)');
-    const update = () => document.documentElement.classList.toggle('dark', theme === 'dark' || (theme === 'system' && media.matches));
-    update();
-    media.addEventListener('change', update);
-    localStorage.setItem('quizgenius-theme', theme);
-    return () => media.removeEventListener('change', update);
-  }, [theme]);
-  return <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
-    <span className="sr-only">{t('app.theme')}</span>
-    <span aria-hidden="true">◐</span>
-    <select value={theme} onChange={event => setTheme(event.target.value as Theme)}
-      aria-label={t('app.theme')}
-      className="rounded-full border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-800">
-      {(['system', 'light', 'dark'] as const).map(value => <option value={value} key={value}>{t(`app.theme_${value}`)}</option>)}
-    </select>
-  </label>;
+    const sync = () => {
+      const saved = localStorage.getItem('quizgenius-theme');
+      const next = saved === 'dark' || (saved !== 'light' && media.matches);
+      document.documentElement.classList.toggle('dark', next);
+      setDark(next);
+    };
+    sync();
+    media.addEventListener('change', sync);
+    return () => media.removeEventListener('change', sync);
+  }, []);
+  const toggle = () => {
+    const next = !dark;
+    localStorage.setItem('quizgenius-theme', next ? 'dark' : 'light');
+    document.documentElement.classList.toggle('dark', next);
+    setDark(next);
+  };
+  return <button type="button" onClick={toggle} className="icon-button" aria-label={t(dark ? 'app.switchLight' : 'app.switchDark')} title={t(dark ? 'app.switchLight' : 'app.switchDark')}>
+    {dark ? <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg> : <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M20.2 15.4A8.7 8.7 0 0 1 8.6 3.8 8.7 8.7 0 1 0 20.2 15.4Z"/></svg>}
+  </button>;
 };

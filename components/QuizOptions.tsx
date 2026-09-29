@@ -128,7 +128,7 @@ export const QuizOptions: React.FC<QuizOptionsProps> = ({
   );
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-2xl mx-auto options-stage">
       <h2 className="text-3xl font-bold text-center mb-2 text-slate-800 dark:text-slate-200">{t('quizOptions.title')}</h2>
       <p className="text-center text-slate-500 dark:text-slate-400 mb-8">
         {t('quizOptions.description')}
@@ -146,7 +146,7 @@ export const QuizOptions: React.FC<QuizOptionsProps> = ({
         </div>
       </div>
 
-      <div className="mt-8 bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-lg border border-violet-100 dark:border-slate-700">
+      <div className="mt-5 bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-lg border border-violet-100 dark:border-slate-700">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
             <label htmlFor="num-questions" className="block text-sm font-medium text-slate-700 dark:text-slate-300">

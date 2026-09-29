@@ -6,6 +6,7 @@ import { isDocxMime } from '../services/textExtractionService';
 
 interface FileUploadProps {
   onFileProcessed: (files: File[], language: Language, subject: SubjectType) => void;
+  onTextProcessed: (text: string, language: Language, subject: SubjectType) => void;
 }
 
 const renderPdfToCanvas = async (file: File): Promise<string> => {
@@ -39,7 +40,9 @@ const renderPdfToCanvas = async (file: File): Promise<string> => {
   });
 };
 
-export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
+export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed, onTextProcessed }) => {
+  const [inputMode, setInputMode] = useState<'file' | 'text'>('file');
+  const [pastedText, setPastedText] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
   const [previewType, setPreviewType] = useState<'image' | 'pdf' | 'docx' | 'multiple' | null>(null);
@@ -178,7 +181,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
   }, [files, language, subjectType, onFileProcessed, t, getPdfPageCount]);
 
   return (
-    <div className="flex flex-col items-center w-full">
+    <div className="upload-panel"><div className="panel-heading"><div><span className="eyebrow">{t('fileUpload.yourMaterial')}</span><h2>{t('fileUpload.title')}</h2><p>{t('fileUpload.subtitle')}</p></div><span className="panel-decoration" aria-hidden="true">✳</span></div><div className="input-tabs"><button className={inputMode === 'file' ? 'active' : ''} type="button" onClick={() => setInputMode('file')}>{t('fileUpload.uploadTab')}</button><button className={inputMode === 'text' ? 'active' : ''} type="button" onClick={() => setInputMode('text')}>{t('fileUpload.pasteTab')}</button></div>{inputMode === 'file' ? <>
       <label
         htmlFor="file-upload"
         className="w-full h-64 border-2 border-dashed border-violet-300 dark:border-violet-600 rounded-3xl flex flex-col items-center justify-center cursor-pointer bg-white/80 dark:bg-slate-800/70 hover:bg-violet-50 dark:hover:bg-slate-700/70 transition-colors shadow-lg shadow-violet-100/50 dark:shadow-none"
@@ -249,9 +252,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
           </p>
         </div>
       )}
+      </> : <div className="paste-area"><label htmlFor="study-text">{t('fileUpload.pasteLabel')}</label><textarea id="study-text" rows={8} value={pastedText} onChange={e => setPastedText(e.target.value)} placeholder={t('fileUpload.pastePlaceholder')} /><p>{t('fileUpload.pasteHint')}</p></div>}
       {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
 
-      {files.length > 0 && (
+      {inputMode === 'file' && files.length > 0 && (
         <div className="mt-6 w-full max-w-lg">
           <p className="text-center truncate text-sm text-slate-500 dark:text-slate-400 mb-4">
             {files.length === 1 ? files[0].name : t('fileUpload.multipleFiles', { count: files.length })}
@@ -304,6 +308,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
           </div>
         </div>
       )}
+      {inputMode === 'text' && <div className="paste-footer"><div className="input-row"><label>{t('fileUpload.subjectType')}<select value={subjectType} onChange={e => setSubjectType(e.target.value as SubjectType)}>{Object.values(SubjectType).map(v => <option key={v} value={v}>{t(`enums.subjectType.${v}`)}</option>)}</select></label><label>{t('fileUpload.documentLanguage')}<select value={language} onChange={e => setLanguage(e.target.value as Language)}>{[Language.English,Language.Dutch,Language.Italian].map(v => <option key={v} value={v}>{v}</option>)}</select></label></div><button className="primary-button" type="button" disabled={pastedText.trim().length < 50 || pastedText.length > 24000} onClick={() => onTextProcessed(pastedText,language,subjectType)}>{t('fileUpload.analyzeMaterial')} <span aria-hidden="true">→</span></button></div>}
     </div>
   );
 };

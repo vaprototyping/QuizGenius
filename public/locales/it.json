@@ -23,7 +23,27 @@
     "accessLabel": "Codice di accesso",
     "continue": "Continua",
     "invalidAccess": "Il codice non è corretto. Riprova.",
-    "accessUnavailable": "L’accesso non è temporaneamente disponibile. Riprova più tardi."
+    "accessUnavailable": "L’accesso non è temporaneamente disponibile. Riprova più tardi.",
+    "eyebrow": "IL TUO COMPAGNO DI STUDIO",
+    "heroTitle": "Dagli appunti a “ce la posso fare.”",
+    "heroCopy": "Carica gli appunti, esercitati con un quiz su misura e impara da ogni risposta. Per studenti e genitori che li aiutano.",
+    "addNotes": "Aggiungi materiale",
+    "takeQuiz": "Esercitati",
+    "learnWhy": "Capisci perché",
+    "sampleLabel": "UN PICCOLO ESEMPIO",
+    "sampleQuestion": "Cosa ti aiuta a ricordare ciò che hai studiato?",
+    "sampleAnswerA": "Rileggere ancora",
+    "sampleAnswerB": "Provare a ricordarlo",
+    "readyTitle": "Pronto a provare?",
+    "accessNote": "Il codice di accesso apre l’anteprima.",
+    "switchLight": "Passa al tema chiaro",
+    "switchDark": "Passa al tema scuro",
+    "progressLabel": "Avanzamento del quiz",
+    "setUp": "Prepara",
+    "review": "Rivedi",
+    "workspaceTitle": "Cosa impariamo oggi?",
+    "workspaceCopy": "Inizia con una foto o un documento di studio. Ne creeremo un quiz.",
+    "footer": "Per menti curiose ✳"
   },
   "loading": {
     "thinking": "L'IA sta pensando...",
@@ -68,7 +88,15 @@
     "cameraDescription": "Scatta una nuova immagine con la fotocamera del tuo telefono o tablet.",
     "multipleCount": "+{count}",
     "multipleFiles": "{count} file selezionati",
-    "docxReady": "DOCX selezionato e pronto"
+    "docxReady": "DOCX selezionato e pronto",
+    "yourMaterial": "PASSO 01 · IL MATERIALE",
+    "title": "Porta i tuoi appunti",
+    "subtitle": "Una foto, un PDF o un documento vanno benissimo.",
+    "uploadTab": "Carica o scatta una foto",
+    "pasteTab": "Incolla testo",
+    "pasteLabel": "Incolla gli appunti",
+    "pastePlaceholder": "Incolla qui la lezione, gli appunti o il capitolo…",
+    "pasteHint": "Da 50 a 24.000 caratteri."
   },
   "quizOptions": {
     "title": "Personalizza il tuo quiz",
@@ -87,7 +115,10 @@
     "placeholder": "La tua risposta qui...",
     "allAnswered": "Per favore, rispondi a tutte le domande prima di inviare.",
     "true": "Vero",
-    "false": "Falso"
+    "false": "Falso",
+    "questionOf": "Domanda {current} di {total}",
+    "previous": "Precedente",
+    "next": "Prossima domanda"
   },
   "quizResults": {
     "title": "Risultati del Quiz",

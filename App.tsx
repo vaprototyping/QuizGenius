@@ -15,10 +15,6 @@ import {
   Question,
   TextQuizOptions
 } from './types';
-import LogoImage from './components/icons/logo.png';
-import UploadStepImage from './components/icons/upload-step.png';
-import ExtractStepImage from './components/icons/extract-step.png';
-import QuizStepImage from './components/icons/quiz-step.png';
 import { useI18n } from './context/i18n';
 import { generateQuiz as generateQuizAPI } from './src/lib/api';
 
@@ -132,6 +128,11 @@ const App: React.FC = () => {
       setStep('upload');
     }
   };
+  const handleTextProcessed = (text: string, lang: Language, subject: SubjectType) => {
+    const clean = text.trim();
+    if (clean.length < 50 || clean.length > 24000) { setError(t(clean.length < 50 ? 'errors.tooLittleText' : 'errors.tooMuchText')); return; }
+    setExtractedText(clean); setLanguage(lang); setSubjectType(subject); setError(null); setStep('options');
+  };
   const handleQuizGenerate = async (options: QuizOptions) => {
     if (!extractedText) return;
     setStep('loading');
@@ -214,19 +215,12 @@ const App: React.FC = () => {
     } catch { setAccessError(t('app.accessUnavailable')); }
     finally { setCheckingAccess(false); }
   };
-  if (!accessCode) return <main className="min-h-screen grid place-items-center bg-amber-50 px-4 dark:bg-slate-950">
-    <form onSubmit={verifyAccess}
-      className="w-full max-w-md rounded-3xl bg-white p-8 shadow-xl dark:bg-slate-800">
-      <h1 className="text-3xl font-bold mb-3">QwitzMe.ai</h1>
-      <p className="mb-6 text-slate-600 dark:text-slate-300">{t('app.accessPrompt')}</p>
-      <label htmlFor="access-code" className="block font-medium mb-2">{t('app.accessLabel')}</label>
-      <input id="access-code" type="password" autoComplete="off" value={accessInput}
-        onChange={event => { setAccessInput(event.target.value); setAccessError(''); }}
-        className="w-full rounded-xl border border-slate-300 p-3 text-slate-900 dark:bg-slate-900 dark:text-white" />
-      {accessError && <p role="alert" className="mt-2 text-red-600">{accessError}</p>}
-      <button disabled={checkingAccess} className="mt-5 w-full rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white disabled:opacity-50" type="submit">{t('app.continue')}</button>
-    </form>
-  </main>;
+  const chrome = <><span className="wordmark"><span className="brand-spark" aria-hidden="true">✳</span> QwitzMe<span className="brand-dot">.ai</span></span><div className="header-actions"><LanguageSelector /><ThemeSelector /></div></>;
+  if (!accessCode) return <div className="app-shell"><header className="site-header">{chrome}</header><main className="gate-layout">
+    <section className="gate-story"><span className="eyebrow">{t('app.eyebrow')}</span><h1>{t('app.heroTitle')}</h1><p className="hero-copy">{t('app.heroCopy')}</p><div className="journey-chips"><span>① {t('app.addNotes')}</span><span>② {t('app.takeQuiz')}</span><span>③ {t('app.learnWhy')}</span></div>
+    <div className="sample-card" aria-hidden="true"><div className="sample-heading"><span className="sample-badge">✦ {t('app.sampleLabel')}</span><span>01 / 05</span></div><p>{t('app.sampleQuestion')}</p><div className="sample-choice">A &nbsp; {t('app.sampleAnswerA')}</div><div className="sample-choice selected">B &nbsp; {t('app.sampleAnswerB')} <span>✓</span></div></div></section>
+    <form onSubmit={verifyAccess} className="gate-card"><div className="gate-icon" aria-hidden="true">↗</div><h2>{t('app.readyTitle')}</h2><p>{t('app.accessPrompt')}</p><label htmlFor="access-code">{t('app.accessLabel')}</label><input id="access-code" type="password" autoComplete="off" value={accessInput} onChange={event => { setAccessInput(event.target.value); setAccessError(''); }} />{accessError && <p role="alert" className="form-error">{accessError}</p>}<button disabled={checkingAccess} className="primary-button" type="submit">{t('app.continue')} <span aria-hidden="true">→</span></button><small>{t('app.accessNote')}</small></form>
+  </main></div>;
   const renderContent = () => {
     if (step === 'loading') {
       const spinnerProgressIndex = (current: number, total: number) => {
@@ -284,7 +278,7 @@ const App: React.FC = () => {
     }
     switch (step) {
       case 'upload':
-        return <FileUpload onFileProcessed={handleFileProcessed} />;
+        return <FileUpload onFileProcessed={handleFileProcessed} onTextProcessed={handleTextProcessed} />;
       case 'options':
         if (extractedText !== null) {
           return <QuizOptionsComponent 
@@ -320,80 +314,14 @@ const App: React.FC = () => {
         }
         return <p>{t('app.errorGeneric')}</p>;
       default:
-        return <FileUpload onFileProcessed={handleFileProcessed} />;
+        return <FileUpload onFileProcessed={handleFileProcessed} onTextProcessed={handleTextProcessed} />;
     }
   };
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-rose-50 to-sky-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 text-slate-900 dark:text-slate-100 font-sans relative">
-      <header className="flex justify-end gap-3 px-4 pt-5 max-w-5xl mx-auto">
-        <ThemeSelector />
-        <LanguageSelector />
-      </header>
-      <main className="container mx-auto px-4 py-10">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-violet-800 dark:text-violet-200 flex items-center justify-center gap-3 tracking-tight">
-            <img src={LogoImage} alt="QwitzMe.ai logo" className="w-10 h-10" />
-            QwitzMe.ai
-          </h1>
-          <p className="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            {t('app.description')}
-          </p>
-          {step === 'upload' && <div className="mt-8 flex justify-center gap-3" role="group" aria-label={t('app.modeLabel')}>
-            {(['student', 'parent'] as const).map(value => <button key={value} type="button" onClick={() => setMode(value)}
-              aria-pressed={mode === value}
-              className={`rounded-full px-6 py-3 font-semibold transition-colors ${mode === value ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-200'}`}>
-              {t(`app.${value}Mode`)}
-            </button>)}
-          </div>}
-          {step === 'upload' && <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">{t(`app.${mode}Description`)}</p>}
-          {step === 'upload' && extractedText === null && (
-            <div className="mt-10 text-center">
-              <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 text-center">{t('app.howItWorks')}</h2>
-              <div className="mt-5 max-w-2xl mx-auto">
-                <div className="p-4 sm:p-5 rounded-3xl border border-white/80 dark:border-slate-700 bg-white/85 dark:bg-slate-800/60 shadow-lg shadow-violet-100/60 dark:shadow-none">
-                  <div className="flex flex-col items-center divide-y divide-slate-200/80 dark:divide-slate-700">
-                    {[{
-                      text: t('app.uploadStep'),
-                      image: UploadStepImage,
-                      alt: 'Upload step icon'
-                    }, {
-                      text: t('app.extractStep'),
-                      image: ExtractStepImage,
-                      alt: 'Text extraction icon'
-                    }, {
-                      text: t('app.quizStep'),
-                      image: QuizStepImage,
-                      alt: 'Quiz generation icon'
-                    }].map((stepItem, index, array) => (
-                      <div
-                        key={stepItem.text}
-                        className={`flex items-center justify-center gap-3 sm:gap-4 ${index > 0 ? 'pt-3 sm:pt-4' : ''} ${index < array.length - 1 ? 'pb-3 sm:pb-4' : ''}`}
-                      >
-                        <img
-                          src={stepItem.image}
-                          alt={stepItem.alt}
-                          className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0"
-                        />
-                        <p className="text-sm sm:text-base font-medium text-slate-800 dark:text-slate-100 text-center">
-                          {stepItem.text}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="max-w-4xl mx-auto flex justify-center">
-          {renderContent()}
-        </div>
-      </main>
-      <footer className="text-center py-6 text-sm text-slate-500 dark:text-slate-400">
-        <p>{t('app.poweredBy')}</p>
-      </footer>
-    </div>
-  );
+  const stage = step === 'upload' ? 0 : step === 'options' || (step === 'loading' && !quiz) ? 1 : step === 'quiz' ? 2 : 3;
+  return <div className="app-shell"><header className="site-header">{chrome}</header><main className="workspace">
+    <nav className="steps" aria-label={t('app.progressLabel')}>{[t('app.addNotes'), t('app.setUp'), t('app.takeQuiz'), t('app.review')].map((label, index) => <div key={label} className={`step-chip ${stage === index ? 'active' : ''} ${stage > index ? 'complete' : ''}`}><span>{stage > index ? '✓' : index + 1}</span><span>{label}</span></div>)}</nav>
+    {step === 'upload' && <div className="upload-intro"><span className="eyebrow">{t('app.eyebrow')}</span><h1>{t('app.workspaceTitle')}</h1><p>{t('app.workspaceCopy')}</p><div className="mode-switch" role="group" aria-label={t('app.modeLabel')}>{(['student','parent'] as const).map(value => <button key={value} type="button" onClick={() => setMode(value)} aria-pressed={mode === value} className={mode === value ? 'selected' : ''}>{value === 'student' ? '✏' : '♥'} &nbsp;{t(`app.${value}Mode`)}</button>)}</div><p className="mode-description">{t(`app.${mode}Description`)}</p></div>}
+    <div className="stage-content">{renderContent()}</div>
+  </main><footer className="site-footer">{t('app.footer')}</footer></div>;
 };
-
 export default App;
