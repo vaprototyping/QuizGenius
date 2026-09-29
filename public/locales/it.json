@@ -72,14 +72,17 @@
     "singleDocumentOnly": "Un PDF o DOCX deve essere caricato da solo, senza altri file.",
     "pdfPageLimit": "I PDF sono limitati a 15 pagine. Carica un documento più corto.",
     "tooLittleText": "Non siamo riusciti a leggere abbastanza testo. Prova un’immagine più nitida o un documento con testo selezionabile.",
-    "tooMuchText": "Il materiale è troppo lungo. Prova un documento più breve o meno immagini."
+    "tooMuchText": "Il materiale è troppo lungo. Prova un documento più breve o meno immagini.",
+    "lowQualityImage": "La foto è troppo sfocata o contiene troppo poco testo leggibile. Carica una foto più nitida con tutta la pagina a fuoco.",
+    "lowQualityImageNumber": "L’immagine {number} è troppo sfocata o contiene troppo poco testo leggibile. Sostituiscila con una foto più nitida.",
+    "photoHelpTitle": "Controlla il materiale"
   },
   "fileUpload": {
     "renderingPdf": "Rendering anteprima PDF...",
     "clickToUpload": "Clicca per caricare",
     "dragAndDrop": "o trascina e rilascia",
     "fileTypes": "Fino a 5 immagini oppure un PDF/DOCX (max 15 pagine)",
-    "subjectType": "Tipo di materia",
+    "subjectType": "Tipo di esercizio",
     "documentLanguage": "Lingua del documento",
     "extractText": "Estrai testo",
     "analyzeMaterial": "Analizza materiale",
@@ -97,7 +100,10 @@
     "pastePlaceholder": "Incolla qui la lezione, gli appunti o il capitolo…",
     "pasteHint": "Da 50 a 24.000 caratteri.",
     "selectedFiles": "File selezionati",
-    "removeFile": "Rimuovi {name}"
+    "removeFile": "Rimuovi {name}",
+    "studySubject": "Materia del contenuto",
+    "chooseSubject": "Scegli una materia",
+    "otherSubject": "Nome della materia"
   },
   "quizOptions": {
     "title": "Personalizza il tuo quiz",
@@ -109,7 +115,18 @@
     "exerciseStyle": "Stile degli esercizi",
     "difficulty": "Difficoltà",
     "back": "Indietro",
-    "generate": "Genera Quiz"
+    "generate": "Genera Quiz",
+    "learnerStep": "PASSO 02 · LO STUDENTE",
+    "studentTitle": "Per chi è il quiz?",
+    "studentDescription": "Queste informazioni ci aiutano a creare domande del livello giusto.",
+    "age": "Età",
+    "agePlaceholder": "es. 12",
+    "schoolType": "Tipo di scuola",
+    "chooseSchoolType": "Scegli la scuola",
+    "year": "Anno in questa scuola",
+    "chooseYear": "Scegli un anno",
+    "yearValue": "Anno {year}",
+    "subjectSummary": "Materia scelta"
   },
   "quizDisplay": {
     "description": "Rispondi alle seguenti domande al meglio delle tue capacità.",
@@ -137,8 +154,8 @@
   },
   "enums": {
     "subjectType": {
-      "Text": "Testo",
-      "Math": "Matematica"
+      "Text": "Lettura e concetti",
+      "Math": "Esercizi di matematica"
     },
     "quizType": {
       "MultipleChoice": "Scelta Multipla",
@@ -154,5 +171,45 @@
       "Medium": "Medio",
       "Hard": "Difficile"
     }
+  },
+  "schoolTypes": {
+    "primary": "Scuola primaria",
+    "middle": "Scuola media",
+    "high": "Scuola superiore",
+    "college": "Università"
+  },
+  "subjectGroups": {
+    "languages": "Lingue e lettura",
+    "science": "Scienze e tecnologia",
+    "math": "Matematica",
+    "humanities": "Persone e società",
+    "otherGroup": "Altre materie"
+  },
+  "subjects": {
+    "languageArts": "Lingua",
+    "english": "Inglese",
+    "dutch": "Olandese",
+    "italian": "Italiano",
+    "foreignLanguages": "Lingue straniere",
+    "literature": "Letteratura",
+    "biology": "Biologia",
+    "chemistry": "Chimica",
+    "physics": "Fisica",
+    "generalScience": "Scienze generali",
+    "earthScience": "Scienze della Terra",
+    "computerScience": "Informatica",
+    "mathematics": "Matematica",
+    "statistics": "Statistica",
+    "history": "Storia",
+    "geography": "Geografia",
+    "civics": "Educazione civica",
+    "economics": "Economia",
+    "philosophy": "Filosofia",
+    "religion": "Religione",
+    "business": "Economia aziendale",
+    "art": "Arte",
+    "music": "Musica",
+    "health": "Educazione alla salute",
+    "other": "Altro"
   }
 }

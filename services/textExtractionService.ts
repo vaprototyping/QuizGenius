@@ -56,19 +56,33 @@ function base64ToBlob(data: string, fallbackMime: string): Blob {
 /**
  * Keyless OCR in the browser. Ignores language/subject for now (can be extended).
  */
+export class ImageQualityError extends Error {
+  constructor(public readonly imageNumber: number) {
+    super('Image quality is too low for reliable text recognition.');
+    this.name = 'ImageQualityError';
+  }
+}
+
 export async function extractTextFromImage(
   base64Data: string,
   _mimeType: string,
   lang: Language,
-  _subject: SubjectType
+  _subject: SubjectType,
+  imageNumber: number
 ): Promise<string> {
   const blob = base64ToBlob(base64Data, _mimeType);
 
   const language = lang === Language.Dutch ? 'nld' : lang === Language.Italian ? 'ita' : 'eng';
   const worker = await createWorker(language);
   try {
-    const { data: { text } } = await worker.recognize(blob);
-    return text?.trim() || "";
+    const { data: { text, confidence } } = await worker.recognize(blob);
+    const recognized = text?.trim() || '';
+    const readableCharacters = (recognized.match(/[\p{L}\p{N}]/gu) || []).length;
+    // A single unclear photo should not silently contaminate a multi-photo quiz.
+    if (readableCharacters < 25 || (confidence < 45 && readableCharacters < 250)) {
+      throw new ImageQualityError(imageNumber);
+    }
+    return recognized;
   } finally {
     await worker.terminate();
   }
@@ -138,12 +152,12 @@ export async function extractTextFromUploads(
 ): Promise<string> {
   const textChunks: string[] = [];
 
-  for (const file of files) {
+  for (const [index, file] of files.entries()) {
     const category = mapFileToCategory(file);
 
     if (category === "image") {
       const base64 = await fileToBase64(file);
-      const text = await extractTextFromImage(base64, file.type, lang, subject);
+      const text = await extractTextFromImage(base64, file.type, lang, subject, index + 1);
       if (text) {
         textChunks.push(text.trim());
       }

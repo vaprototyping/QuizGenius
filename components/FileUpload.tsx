@@ -3,26 +3,37 @@ import { Language, SubjectType } from '../types';
 import { UploadIcon } from './icons/UploadIcon';
 import { useI18n } from '../context/i18n';
 import { isDocxMime } from '../services/textExtractionService';
+import { SUBJECT_GROUPS, SubjectKey } from '../studyContext';
 
 interface FileUploadProps {
-  onFileProcessed: (files: File[], language: Language, subject: SubjectType) => void;
-  onTextProcessed: (text: string, language: Language, subject: SubjectType) => void;
+  initialFiles?: File[];
+  initialLanguage?: Language;
+  initialFocus?: SubjectType;
+  initialStudySubject?: SubjectKey | '';
+  initialCustomSubject?: string;
+  onMaterialChange?: () => void;
+  onFileProcessed: (files: File[], language: Language, focus: SubjectType, studySubject: SubjectKey, customSubject?: string) => void;
+  onTextProcessed: (text: string, language: Language, focus: SubjectType, studySubject: SubjectKey, customSubject?: string) => void;
 }
 
 type SelectedFile = { id: number; file: File; thumbnail?: string };
 
-export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed, onTextProcessed }) => {
+export const FileUpload: React.FC<FileUploadProps> = ({ initialFiles, initialLanguage, initialFocus, initialStudySubject, initialCustomSubject, onMaterialChange, onFileProcessed, onTextProcessed }) => {
   const [inputMode, setInputMode] = useState<'file' | 'text'>('file');
   const [pastedText, setPastedText] = useState('');
   const [selected, setSelected] = useState<SelectedFile[]>([]);
-  const [language, setLanguage] = useState<Language>(Language.English);
-  const [subjectType, setSubjectType] = useState<SubjectType>(SubjectType.Text);
+  const [language, setLanguage] = useState<Language>(initialLanguage ?? Language.English);
+  const [subjectType, setSubjectType] = useState<SubjectType>(initialFocus ?? SubjectType.Text);
+  const [studySubject, setStudySubject] = useState<SubjectKey | ''>(initialStudySubject ?? '');
+  const [customSubject, setCustomSubject] = useState(initialCustomSubject ?? '');
   const [error, setError] = useState<string | null>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const pickerInputRef = useRef<HTMLInputElement>(null);
   const filesRef = useRef<SelectedFile[]>([]);
   const nextId = useRef(0);
   const { t } = useI18n();
+  const subjectReady = Boolean(studySubject && (studySubject !== 'other' || customSubject.trim().length >= 2));
+  const subjectSelector = <div className="study-subject-field"><label htmlFor="study-subject">{t('fileUpload.studySubject')}</label><select id="study-subject" value={studySubject} onChange={event => { const value = event.target.value as SubjectKey | ''; setStudySubject(value); if (value === 'mathematics' || value === 'statistics') setSubjectType(SubjectType.Math); }} required><option value="">{t('fileUpload.chooseSubject')}</option>{SUBJECT_GROUPS.map(group => <optgroup label={t(`subjectGroups.${group.key}`)} key={group.key}>{group.subjects.map(key => <option value={key} key={key}>{t(`subjects.${key}`)}</option>)}</optgroup>)}</select>{studySubject === 'other' && <input value={customSubject} maxLength={80} onChange={event => setCustomSubject(event.target.value)} aria-label={t('fileUpload.otherSubject')} placeholder={t('fileUpload.otherSubject')} />}</div>;
 
   // Each preview belongs to its selection and is released when the item goes away.
   useEffect(() => {
@@ -31,6 +42,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed, onTextP
   useEffect(() => () => filesRef.current.forEach(item => {
     if (item.thumbnail) URL.revokeObjectURL(item.thumbnail);
   }), []);
+  useEffect(() => {
+    if (!initialFiles?.length) return;
+    const restored = initialFiles.map((file, id) => ({ id, file, thumbnail: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined }));
+    nextId.current = restored.length;
+    filesRef.current = restored;
+    setSelected(restored);
+  }, []);
 
   const addFiles = (incoming: File[]) => {
     if (!incoming.length) return;
@@ -54,6 +72,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed, onTextP
     filesRef.current = [...current, ...items];
     setSelected(filesRef.current);
     setError(null);
+    onMaterialChange?.();
   };
 
   const removeFile = (id: number) => {
@@ -62,6 +81,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed, onTextP
     filesRef.current = filesRef.current.filter(item => item.id !== id);
     setSelected(filesRef.current);
     setError(null);
+    onMaterialChange?.();
   };
 
   const handleSubmit = async () => {
@@ -81,7 +101,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed, onTextP
         return;
       }
     }
-    onFileProcessed(files, language, subjectType);
+    if (!subjectReady || !studySubject) return;
+    onFileProcessed(files, language, subjectType, studySubject, studySubject === 'other' ? customSubject.trim() : undefined);
   };
 
   return <div className="upload-panel">
@@ -102,7 +123,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed, onTextP
         <button type="button" onClick={() => removeFile(id)} aria-label={t('fileUpload.removeFile', { name: file.name })} title={t('fileUpload.removeFile', { name: file.name })}>×</button>
       </li>)}</ul></section>}
       {error && <p role="alert" className="upload-error">{error}</p>}
-      {selected.length > 0 && <div className="file-settings"><div className="input-row"><label>{t('fileUpload.subjectType')}<select value={subjectType} onChange={event => setSubjectType(event.target.value as SubjectType)}>{Object.values(SubjectType).map(value => <option key={value} value={value}>{t(`enums.subjectType.${value}`)}</option>)}</select></label><label>{t('fileUpload.documentLanguage')}<select value={language} onChange={event => setLanguage(event.target.value as Language)}>{[Language.English, Language.Dutch, Language.Italian].map(value => <option key={value} value={value}>{value}</option>)}</select></label></div><button type="button" className="primary-button" onClick={handleSubmit}>{t('fileUpload.analyzeMaterial')} <span aria-hidden="true">→</span></button></div>}
-    </> : <><div className="paste-area"><label htmlFor="study-text">{t('fileUpload.pasteLabel')}</label><textarea id="study-text" rows={8} value={pastedText} onChange={event => setPastedText(event.target.value)} placeholder={t('fileUpload.pastePlaceholder')} /><p>{t('fileUpload.pasteHint')}</p></div><div className="paste-footer"><div className="input-row"><label>{t('fileUpload.subjectType')}<select value={subjectType} onChange={event => setSubjectType(event.target.value as SubjectType)}>{Object.values(SubjectType).map(value => <option key={value} value={value}>{t(`enums.subjectType.${value}`)}</option>)}</select></label><label>{t('fileUpload.documentLanguage')}<select value={language} onChange={event => setLanguage(event.target.value as Language)}>{[Language.English, Language.Dutch, Language.Italian].map(value => <option key={value} value={value}>{value}</option>)}</select></label></div><button className="primary-button" type="button" disabled={pastedText.trim().length < 50 || pastedText.length > 24000} onClick={() => onTextProcessed(pastedText, language, subjectType)}>{t('fileUpload.analyzeMaterial')} <span aria-hidden="true">→</span></button></div></>}
+      {selected.length > 0 && <div className="file-settings">{subjectSelector}<div className="input-row"><label>{t('fileUpload.subjectType')}<select value={subjectType} onChange={event => setSubjectType(event.target.value as SubjectType)}>{Object.values(SubjectType).map(value => <option key={value} value={value}>{t(`enums.subjectType.${value}`)}</option>)}</select></label><label>{t('fileUpload.documentLanguage')}<select value={language} onChange={event => setLanguage(event.target.value as Language)}>{[Language.English, Language.Dutch, Language.Italian].map(value => <option key={value} value={value}>{value}</option>)}</select></label></div><button type="button" className="primary-button" disabled={!subjectReady} onClick={handleSubmit}>{t('fileUpload.analyzeMaterial')} <span aria-hidden="true">→</span></button></div>}
+    </> : <><div className="paste-area"><label htmlFor="study-text">{t('fileUpload.pasteLabel')}</label><textarea id="study-text" rows={8} value={pastedText} onChange={event => setPastedText(event.target.value)} placeholder={t('fileUpload.pastePlaceholder')} /><p>{t('fileUpload.pasteHint')}</p></div><div className="paste-footer">{subjectSelector}<div className="input-row"><label>{t('fileUpload.subjectType')}<select value={subjectType} onChange={event => setSubjectType(event.target.value as SubjectType)}>{Object.values(SubjectType).map(value => <option key={value} value={value}>{t(`enums.subjectType.${value}`)}</option>)}</select></label><label>{t('fileUpload.documentLanguage')}<select value={language} onChange={event => setLanguage(event.target.value as Language)}>{[Language.English, Language.Dutch, Language.Italian].map(value => <option key={value} value={value}>{value}</option>)}</select></label></div><button className="primary-button" type="button" disabled={!subjectReady || pastedText.trim().length < 50 || pastedText.length > 24000} onClick={() => onTextProcessed(pastedText, language, subjectType, studySubject as SubjectKey, studySubject === 'other' ? customSubject.trim() : undefined)}>{t('fileUpload.analyzeMaterial')} <span aria-hidden="true">→</span></button></div></>}
   </div>;
 };

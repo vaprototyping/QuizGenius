@@ -5,7 +5,8 @@ import { QuizDisplay } from './components/QuizDisplay';
 import { QuizResults } from './components/QuizResults';
 import { LanguageSelector } from './components/LanguageSelector';
 import { ThemeSelector } from './components/ThemeSelector';
-import { extractTextFromUploads, isDocxMime } from './services/textExtractionService';
+import { extractTextFromUploads, ImageQualityError, isDocxMime } from './services/textExtractionService';
+import { StudentProfile, SubjectKey } from './studyContext';
 import {
   Quiz,
   Language,
@@ -37,6 +38,10 @@ const App: React.FC = () => {
   const [currentQuizOptions, setCurrentQuizOptions] = useState<QuizOptions | null>(null);
   const [language, setLanguage] = useState<Language>(Language.English);
   const [subjectType, setSubjectType] = useState<SubjectType>(SubjectType.Text);
+  const [studySubject, setStudySubject] = useState<SubjectKey | ''>('');
+  const [customSubject, setCustomSubject] = useState('');
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [studentProfile, setStudentProfile] = useState<StudentProfile>({ age: null, schoolType: '', year: null });
   const [mode, setMode] = useState<'student' | 'parent'>('student');
   const [accessCode, setAccessCode] = useState('');
   const [accessInput, setAccessInput] = useState('');
@@ -92,27 +97,33 @@ const App: React.FC = () => {
       }
     }, intervalDuration);
   }, [stopProgressSimulation]);
-  const handleFileProcessed = async (selectedFiles: File[], lang: Language, subject: SubjectType) => {
+  const handleFileProcessed = async (selectedFiles: File[], lang: Language, subject: SubjectType, selectedSubject: SubjectKey, otherSubject?: string) => {
     setStep('loading');
+    setUploadedFiles(selectedFiles);
     setError(null);
     setLanguage(lang);
     setSubjectType(subject);
+    setStudySubject(selectedSubject);
+    setCustomSubject(otherSubject || '');
     const images = selectedFiles.filter((file) => file.type.startsWith('image/'));
     const pdfFile = selectedFiles.find((file) => file.type === 'application/pdf');
     const docxFile = selectedFiles.find((file) => isDocxMime(file.type));
     if (images.length > 0) {
       setProcessingDetails({ type: 'images', totalItems: images.length });
     } else if (pdfFile) {
-      const pageCount = await getPdfPageCount(pdfFile);
-      setProcessingDetails({ type: 'pdf', totalPages: Math.max(1, pageCount) });
+      setProcessingDetails({ type: 'pdf', totalPages: 1 });
     } else if (docxFile) {
       setProcessingDetails({ type: 'docx' });
     }
     const duration = Math.min(15, Math.max(6, selectedFiles.length * 3));
     startProgressSimulation([t('loading.analyzing'), t('loading.extracting'), t('loading.finalizing')], duration);
     try {
+      if (pdfFile) {
+        const pageCount = await getPdfPageCount(pdfFile);
+        setProcessingDetails({ type: 'pdf', totalPages: Math.max(1, pageCount) });
+      }
       const text = await extractTextFromUploads(selectedFiles, lang, subject);
-      if (!text || text.trim().length < 50) throw new Error(t('errors.tooLittleText'));
+      if (!text || text.trim().length < 50) throw new Error(t(images.length ? 'errors.lowQualityImage' : 'errors.tooLittleText'));
       if (text.length > 24000) throw new Error(t('errors.tooMuchText'));
       stopProgressSimulation();
       setProgress(100);
@@ -123,15 +134,15 @@ const App: React.FC = () => {
     } catch (e) {
       stopProgressSimulation();
       console.error(e);
-      setError(e instanceof Error ? e.message : t('errors.unknownExtraction'));
+      setError(e instanceof ImageQualityError ? t('errors.lowQualityImageNumber', {number: e.imageNumber}) : e instanceof Error ? e.message : t('errors.unknownExtraction'));
       setProcessingDetails(null);
       setStep('upload');
     }
   };
-  const handleTextProcessed = (text: string, lang: Language, subject: SubjectType) => {
+  const handleTextProcessed = (text: string, lang: Language, subject: SubjectType, selectedSubject: SubjectKey, otherSubject?: string) => {
     const clean = text.trim();
     if (clean.length < 50 || clean.length > 24000) { setError(t(clean.length < 50 ? 'errors.tooLittleText' : 'errors.tooMuchText')); return; }
-    setExtractedText(clean); setLanguage(lang); setSubjectType(subject); setError(null); setStep('options');
+    setUploadedFiles([]); setExtractedText(clean); setLanguage(lang); setSubjectType(subject); setStudySubject(selectedSubject); setCustomSubject(otherSubject || ''); setError(null); setStep('options');
   };
   const handleQuizGenerate = async (options: QuizOptions) => {
     if (!extractedText) return;
@@ -153,6 +164,9 @@ const App: React.FC = () => {
         subject: options.subjectType === SubjectType.Math ? 'math' : 'text',
         difficulty: options.subjectType === SubjectType.Math ? options.difficulty : undefined,
         mathStyle: options.subjectType === SubjectType.Math ? options.mathQuizType : undefined,
+        studySubject: studySubject as SubjectKey,
+        customSubject: studySubject === 'other' ? customSubject : undefined,
+        studentProfile,
       }, accessCode);
       const quizData: Quiz = {
         title: generated.title,
@@ -192,6 +206,10 @@ const App: React.FC = () => {
     setStep('upload');
     setError(null);
     setExtractedText(null);
+    setUploadedFiles([]);
+    setStudySubject('');
+    setCustomSubject('');
+    setStudentProfile({ age: null, schoolType: '', year: null });
     setQuiz(null);
     setUserAnswers({});
     setCurrentQuizOptions(null);
@@ -262,32 +280,23 @@ const App: React.FC = () => {
         </div>
       );
     }
-    if (error) {
-        return (
-            <div className="text-center max-w-xl mx-auto">
-                <h2 className="text-2xl font-bold text-red-600 dark:text-red-400">{t('app.errorTitle')}</h2>
-                <p className="mt-2 text-slate-600 dark:text-slate-300 bg-red-50 dark:bg-red-900/20 p-4 rounded-md">{error}</p>
-                <button
-                    onClick={handleRestart}
-                    className="mt-6 px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
-                >
-                    {t('app.startOver')}
-                </button>
-            </div>
-        )
-    }
+    const errorMessage = error && <div role="alert" className="flow-error"><strong>{step === 'upload' ? t('errors.photoHelpTitle') : t('app.errorTitle')}</strong><p>{error}</p></div>;
     switch (step) {
       case 'upload':
-        return <FileUpload onFileProcessed={handleFileProcessed} onTextProcessed={handleTextProcessed} />;
+        return <>{errorMessage}<FileUpload initialFiles={uploadedFiles} initialLanguage={language} initialFocus={subjectType} initialStudySubject={studySubject} initialCustomSubject={customSubject} onMaterialChange={() => setError(null)} onFileProcessed={handleFileProcessed} onTextProcessed={handleTextProcessed} /></>;
       case 'options':
         if (extractedText !== null) {
-          return <QuizOptionsComponent 
+          return <>{errorMessage}<QuizOptionsComponent
             extractedText={extractedText} 
             initialLanguage={language} 
             initialSubjectType={subjectType}
+            studentProfile={studentProfile}
+            onStudentProfileChange={setStudentProfile}
+            studySubject={studySubject as SubjectKey}
+            customSubject={customSubject}
             onQuizGenerate={handleQuizGenerate} 
             onBack={handleRestart}
-          />;
+          /></>;
         }
         handleRestart();
         return null;
@@ -314,7 +323,7 @@ const App: React.FC = () => {
         }
         return <p>{t('app.errorGeneric')}</p>;
       default:
-        return <FileUpload onFileProcessed={handleFileProcessed} onTextProcessed={handleTextProcessed} />;
+        return <FileUpload initialFiles={uploadedFiles} initialLanguage={language} initialFocus={subjectType} initialStudySubject={studySubject} initialCustomSubject={customSubject} onMaterialChange={() => setError(null)} onFileProcessed={handleFileProcessed} onTextProcessed={handleTextProcessed} />;
     }
   };
   const stage = step === 'upload' ? 0 : step === 'options' || (step === 'loading' && !quiz) ? 1 : step === 'quiz' ? 2 : 3;

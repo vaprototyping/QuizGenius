@@ -1,10 +1,11 @@
+import type { StudentProfile, SubjectKey } from '../../studyContext';
 // src/lib/api.ts
 export async function generateQuiz(
   ocrText: string,
   quizType: "mcq" | "true_false" | "open",
   numberOfQuestions: number,
   language: string,
-  preferences: { mode: 'student' | 'parent'; subject: 'text' | 'math'; difficulty?: string; mathStyle?: string },
+  preferences: { mode: 'student' | 'parent'; subject: 'text' | 'math'; difficulty?: string; mathStyle?: string; studySubject: SubjectKey; customSubject?: string; studentProfile: StudentProfile },
   accessCode: string
 ) {
   const res = await fetch("/api/generate-quiz", {

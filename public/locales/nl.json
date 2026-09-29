@@ -72,14 +72,17 @@
     "singleDocumentOnly": "Een PDF of DOCX moet alleen worden geüpload, zonder andere bestanden.",
     "pdfPageLimit": "PDF's zijn beperkt tot 15 pagina's. Upload een korter document.",
     "tooLittleText": "We konden niet genoeg tekst lezen. Probeer een duidelijkere afbeelding of een document met selecteerbare tekst.",
-    "tooMuchText": "Dit materiaal is te lang. Probeer een korter document of minder afbeeldingen."
+    "tooMuchText": "Dit materiaal is te lang. Probeer een korter document of minder afbeeldingen.",
+    "lowQualityImage": "Deze foto is te onscherp of bevat te weinig leesbare tekst. Upload een scherpere foto waarop de hele pagina duidelijk te zien is.",
+    "lowQualityImageNumber": "Afbeelding {number} is te onscherp of bevat te weinig leesbare tekst. Vervang deze door een scherpere foto.",
+    "photoHelpTitle": "Controleer je leerstof"
   },
   "fileUpload": {
     "renderingPdf": "PDF-voorbeeld renderen...",
     "clickToUpload": "Klik om te uploaden",
     "dragAndDrop": "of sleep het hierheen",
     "fileTypes": "Tot 5 afbeeldingen of één PDF/DOCX (max 15 pagina's)",
-    "subjectType": "Onderwerptype",
+    "subjectType": "Soort oefening",
     "documentLanguage": "Taal van het document",
     "extractText": "Tekst extraheren",
     "analyzeMaterial": "Materiaal analyseren",
@@ -97,7 +100,10 @@
     "pastePlaceholder": "Plak hier de les, aantekeningen of het hoofdstuk…",
     "pasteHint": "Minimaal 50, maximaal 24.000 tekens.",
     "selectedFiles": "Geselecteerde bestanden",
-    "removeFile": "{name} verwijderen"
+    "removeFile": "{name} verwijderen",
+    "studySubject": "Vak van de leerstof",
+    "chooseSubject": "Kies een vak",
+    "otherSubject": "Naam van het vak"
   },
   "quizOptions": {
     "title": "Pas uw quiz aan",
@@ -109,7 +115,18 @@
     "exerciseStyle": "Oefenstijl",
     "difficulty": "Moeilijkheidsgraad",
     "back": "Terug",
-    "generate": "Quiz genereren"
+    "generate": "Quiz genereren",
+    "learnerStep": "STAP 02 · DE LEERLING",
+    "studentTitle": "Voor wie is de quiz?",
+    "studentDescription": "Met wat context maken we vragen op het juiste niveau.",
+    "age": "Leeftijd",
+    "agePlaceholder": "bijv. 12",
+    "schoolType": "Schooltype",
+    "chooseSchoolType": "Kies een schooltype",
+    "year": "Leerjaar op deze school",
+    "chooseYear": "Kies een leerjaar",
+    "yearValue": "Leerjaar {year}",
+    "subjectSummary": "Gekozen vak"
   },
   "quizDisplay": {
     "description": "Beantwoord de volgende vragen naar uw beste vermogen.",
@@ -137,8 +154,8 @@
   },
   "enums": {
     "subjectType": {
-      "Text": "Tekst",
-      "Math": "Wiskunde"
+      "Text": "Lezen en begrippen",
+      "Math": "Rekenopgaven"
     },
     "quizType": {
       "MultipleChoice": "Meerkeuze",
@@ -154,5 +171,45 @@
       "Medium": "Gemiddeld",
       "Hard": "Moeilijk"
     }
+  },
+  "schoolTypes": {
+    "primary": "Basisschool",
+    "middle": "Middelbare school (onderbouw)",
+    "high": "Middelbare school (bovenbouw)",
+    "college": "Hogeschool / universiteit"
+  },
+  "subjectGroups": {
+    "languages": "Talen en lezen",
+    "science": "Wetenschap en technologie",
+    "math": "Wiskunde",
+    "humanities": "Mens en maatschappij",
+    "otherGroup": "Andere vakken"
+  },
+  "subjects": {
+    "languageArts": "Taal",
+    "english": "Engels",
+    "dutch": "Nederlands",
+    "italian": "Italiaans",
+    "foreignLanguages": "Vreemde talen",
+    "literature": "Literatuur",
+    "biology": "Biologie",
+    "chemistry": "Scheikunde",
+    "physics": "Natuurkunde",
+    "generalScience": "Algemene wetenschap",
+    "earthScience": "Aardwetenschappen",
+    "computerScience": "Informatica",
+    "mathematics": "Wiskunde",
+    "statistics": "Statistiek",
+    "history": "Geschiedenis",
+    "geography": "Aardrijkskunde",
+    "civics": "Maatschappijleer",
+    "economics": "Economie",
+    "philosophy": "Filosofie",
+    "religion": "Godsdienst",
+    "business": "Bedrijfskunde",
+    "art": "Kunst",
+    "music": "Muziek",
+    "health": "Gezondheid",
+    "other": "Anders"
   }
 }

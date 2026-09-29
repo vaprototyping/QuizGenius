@@ -72,14 +72,17 @@
     "singleDocumentOnly": "A PDF or DOCX must be uploaded alone, not with other files.",
     "pdfPageLimit": "PDFs are limited to 15 pages. Please upload a shorter document.",
     "tooLittleText": "We could not read enough text. Try a clearer image or a document with selectable text.",
-    "tooMuchText": "This material is too long. Try a shorter document or fewer images."
+    "tooMuchText": "This material is too long. Try a shorter document or fewer images.",
+    "lowQualityImage": "This photo is too blurry or has too little readable text. Please upload a clearer image with the whole page in focus.",
+    "lowQualityImageNumber": "Image {number} is too blurry or has too little readable text. Please replace it with a clearer photo.",
+    "photoHelpTitle": "Check your material"
   },
   "fileUpload": {
     "renderingPdf": "Rendering PDF preview...",
     "clickToUpload": "Click to upload",
     "dragAndDrop": "or drag and drop",
     "fileTypes": "Up to 5 images, or one PDF/DOCX (max 15 pages)",
-    "subjectType": "Subject Type",
+    "subjectType": "Practice focus",
     "documentLanguage": "Document Language",
     "extractText": "Extract Text",
     "analyzeMaterial": "Analyze Material",
@@ -97,7 +100,10 @@
     "pastePlaceholder": "Paste the lesson, notes, or chapter you want to practise…",
     "pasteHint": "At least 50 characters, up to 24,000.",
     "selectedFiles": "Selected files",
-    "removeFile": "Remove {name}"
+    "removeFile": "Remove {name}",
+    "studySubject": "Subject of the material",
+    "chooseSubject": "Choose a subject",
+    "otherSubject": "Name the subject"
   },
   "quizOptions": {
     "title": "Customize Your Quiz",
@@ -109,7 +115,18 @@
     "exerciseStyle": "Exercise Style",
     "difficulty": "Difficulty",
     "back": "Back",
-    "generate": "Generate Quiz"
+    "generate": "Generate Quiz",
+    "learnerStep": "STEP 02 · THE LEARNER",
+    "studentTitle": "Who's the student?",
+    "studentDescription": "A little context helps us write questions at the right level.",
+    "age": "Age",
+    "agePlaceholder": "e.g. 12",
+    "schoolType": "School type",
+    "chooseSchoolType": "Choose a school type",
+    "year": "Year at this school",
+    "chooseYear": "Choose a year",
+    "yearValue": "Year {year}",
+    "subjectSummary": "Selected subject"
   },
   "quizDisplay": {
     "description": "Answer the following questions to the best of your ability.",
@@ -137,8 +154,8 @@
   },
   "enums": {
     "subjectType": {
-      "Text": "Text",
-      "Math": "Math"
+      "Text": "Reading & concepts",
+      "Math": "Math exercises"
     },
     "quizType": {
       "MultipleChoice": "Multiple Choice",
@@ -154,5 +171,45 @@
       "Medium": "Medium",
       "Hard": "Hard"
     }
+  },
+  "schoolTypes": {
+    "primary": "Primary school",
+    "middle": "Middle school",
+    "high": "High school",
+    "college": "College / university"
+  },
+  "subjectGroups": {
+    "languages": "Languages & reading",
+    "science": "Science & technology",
+    "math": "Mathematics",
+    "humanities": "People & society",
+    "otherGroup": "Other subjects"
+  },
+  "subjects": {
+    "languageArts": "Language arts",
+    "english": "English",
+    "dutch": "Dutch",
+    "italian": "Italian",
+    "foreignLanguages": "Foreign languages",
+    "literature": "Literature",
+    "biology": "Biology",
+    "chemistry": "Chemistry",
+    "physics": "Physics",
+    "generalScience": "General science",
+    "earthScience": "Earth science",
+    "computerScience": "Computer science",
+    "mathematics": "Mathematics",
+    "statistics": "Statistics",
+    "history": "History",
+    "geography": "Geography",
+    "civics": "Civics",
+    "economics": "Economics",
+    "philosophy": "Philosophy",
+    "religion": "Religion",
+    "business": "Business studies",
+    "art": "Art",
+    "music": "Music",
+    "health": "Health education",
+    "other": "Other"
   }
 }
