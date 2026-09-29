@@ -217,7 +217,7 @@ const App: React.FC = () => {
   };
   const chrome = <><span className="wordmark"><span className="brand-spark" aria-hidden="true">✳</span> QwitzMe<span className="brand-dot">.ai</span></span><div className="header-actions"><LanguageSelector /><ThemeSelector /></div></>;
   if (!accessCode) return <div className="app-shell"><header className="site-header">{chrome}</header><main className="gate-layout">
-    <section className="gate-story"><span className="eyebrow">{t('app.eyebrow')}</span><h1>{t('app.heroTitle')}</h1><p className="hero-copy">{t('app.heroCopy')}</p><div className="journey-chips"><span>① {t('app.addNotes')}</span><span>② {t('app.takeQuiz')}</span><span>③ {t('app.learnWhy')}</span></div>
+    <section className="gate-story"><span className="eyebrow">{t('app.eyebrow')}</span><h1>{t('app.heroTitle')}</h1><p className="hero-copy">{t('app.heroCopy')}</p><div className="journey-chips">{[t('app.addNotes'), t('app.takeQuiz'), t('app.learnWhy')].map((label, index) => <span key={label}><b aria-hidden="true">{index + 1}</b>{label}</span>)}</div>
     <div className="sample-card" aria-hidden="true"><div className="sample-heading"><span className="sample-badge">✦ {t('app.sampleLabel')}</span><span>01 / 05</span></div><p>{t('app.sampleQuestion')}</p><div className="sample-choice">A &nbsp; {t('app.sampleAnswerA')}</div><div className="sample-choice selected">B &nbsp; {t('app.sampleAnswerB')} <span>✓</span></div></div></section>
     <form onSubmit={verifyAccess} className="gate-card"><div className="gate-icon" aria-hidden="true">↗</div><h2>{t('app.readyTitle')}</h2><p>{t('app.accessPrompt')}</p><label htmlFor="access-code">{t('app.accessLabel')}</label><input id="access-code" type="password" autoComplete="off" value={accessInput} onChange={event => { setAccessInput(event.target.value); setAccessError(''); }} />{accessError && <p role="alert" className="form-error">{accessError}</p>}<button disabled={checkingAccess} className="primary-button" type="submit">{t('app.continue')} <span aria-hidden="true">→</span></button><small>{t('app.accessNote')}</small></form>
   </main></div>;
@@ -322,6 +322,6 @@ const App: React.FC = () => {
     <nav className="steps" aria-label={t('app.progressLabel')}>{[t('app.addNotes'), t('app.setUp'), t('app.takeQuiz'), t('app.review')].map((label, index) => <div key={label} className={`step-chip ${stage === index ? 'active' : ''} ${stage > index ? 'complete' : ''}`}><span>{stage > index ? '✓' : index + 1}</span><span>{label}</span></div>)}</nav>
     {step === 'upload' && <div className="upload-intro"><span className="eyebrow">{t('app.eyebrow')}</span><h1>{t('app.workspaceTitle')}</h1><p>{t('app.workspaceCopy')}</p><div className="mode-switch" role="group" aria-label={t('app.modeLabel')}>{(['student','parent'] as const).map(value => <button key={value} type="button" onClick={() => setMode(value)} aria-pressed={mode === value} className={mode === value ? 'selected' : ''}>{value === 'student' ? '✏' : '♥'} &nbsp;{t(`app.${value}Mode`)}</button>)}</div><p className="mode-description">{t(`app.${mode}Description`)}</p></div>}
     <div className="stage-content">{renderContent()}</div>
-  </main><footer className="site-footer">{t('app.footer')}</footer></div>;
+  </main></div>;
 };
 export default App;

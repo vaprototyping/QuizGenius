@@ -42,8 +42,7 @@
     "setUp": "Set up",
     "review": "Review",
     "workspaceTitle": "What are we learning today?",
-    "workspaceCopy": "Start with a photo or document of your study material. We’ll make a quiz from it.",
-    "footer": "Made for curious minds ✳"
+    "workspaceCopy": "Start with a photo or document of your study material. We’ll make a quiz from it."
   },
   "loading": {
     "thinking": "AI is thinking...",

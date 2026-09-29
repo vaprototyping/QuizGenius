@@ -48,6 +48,25 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
     }
   }, [quiz, subjectType]);
 
+  const allQuestionsAnswered = quiz.questions.every((_, index) => Boolean(userAnswers[index]?.trim()));
+
+  useEffect(() => {
+    const advanceOnEnter = (event: KeyboardEvent) => {
+      if (event.key !== 'Enter' || event.repeat || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      const target = event.target as HTMLElement | null;
+      if (target?.closest('textarea, [contenteditable="true"]')) return;
+      if (target?.closest('button, select, input:not([type="radio"])')) return;
+      if (!userAnswers[current]?.trim()) return;
+      event.preventDefault();
+      if (current < quiz.questions.length - 1) {
+        setCurrent(current + 1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (allQuestionsAnswered) onSubmit();
+    };
+    window.addEventListener('keydown', advanceOnEnter);
+    return () => window.removeEventListener('keydown', advanceOnEnter);
+  }, [current, quiz.questions.length, userAnswers, allQuestionsAnswered, onSubmit]);
+
   const handleAnswerChange = (questionIndex: number, answer: string) => {
     setUserAnswers((prev) => ({
       ...prev,
@@ -79,7 +98,7 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
                       value={option}
                       checked={userAnswer === option}
                       onChange={() => handleAnswerChange(index, option)}
-                      className="h-4 w-4 text-indigo-600 border-slate-300 focus:ring-indigo-500"
+                      className="quiz-radio"
                     />
                     <span className="ml-3 text-slate-700 dark:text-slate-300">
                       {subjectType === SubjectType.Math ? <MathText text={option} /> : option}
@@ -99,7 +118,7 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
                       value={option}
                       checked={userAnswer === option}
                       onChange={() => handleAnswerChange(index, option)}
-                      className="h-4 w-4 text-indigo-600 border-slate-300 focus:ring-indigo-500"
+                      className="quiz-radio"
                     />
                     <span className="ml-3 text-slate-700 dark:text-slate-300">{t(`quizDisplay.${option.toLowerCase()}`)}</span>
                   </label>
@@ -122,8 +141,6 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
     );
   };
   
-  const allQuestionsAnswered = Object.keys(userAnswers).length === quiz.questions.length && Object.values(userAnswers).every(ans => typeof ans === 'string' && ans.trim() !== '');
-
   return (
     <div className="w-full max-w-3xl mx-auto" id="quiz-display">
       <h2 className="text-3xl font-bold text-center mb-2 text-slate-800 dark:text-slate-200">{quiz.title}</h2>
@@ -131,7 +148,7 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
         {t('quizDisplay.description')}
       </p>
 
-      <div className="question-progress"><span>{t('quizDisplay.questionOf', {current: current + 1, total: quiz.questions.length})}</span><span>{Math.round((current / quiz.questions.length) * 100)}%</span></div><div className="progress-track"><span style={{width: `${((current + 1) / quiz.questions.length) * 100}%`}} /></div>
+      <div className="question-progress"><span>{t('quizDisplay.questionOf', {current: current + 1, total: quiz.questions.length})}</span><span>{Math.round(((current + 1) / quiz.questions.length) * 100)}%</span></div><div className="progress-track"><span style={{width: `${((current + 1) / quiz.questions.length) * 100}%`}} /></div>
       <div>{renderQuestion(quiz.questions[current], current)}</div>
 
       <div className="quiz-navigation"><button type="button" className="secondary-button" onClick={() => { setCurrent(c => Math.max(0,c-1)); window.scrollTo({top:0,behavior:'smooth'}); }} disabled={current === 0}>{t('quizDisplay.previous')}</button>{current < quiz.questions.length - 1 ? <button type="button" className="primary-button" onClick={() => { setCurrent(c => c+1); window.scrollTo({top:0,behavior:'smooth'}); }} disabled={!userAnswers[current]?.trim()}>{t('quizDisplay.next')} →</button> : <button type="button" className="primary-button" onClick={onSubmit} disabled={!allQuestionsAnswered}>{t('app.submit')} →</button>}</div>
