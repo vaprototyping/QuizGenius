@@ -1,4 +1,4 @@
-const CACHE = 'qwitzme-static-v1';
+const CACHE = 'qwitzme-static-v2';
 const CORE = ['/offline.html', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
@@ -17,7 +17,19 @@ self.addEventListener('fetch', event => {
     event.respondWith(fetch(request).catch(() => caches.match('/offline.html')));
     return;
   }
-  if (!url.pathname.startsWith('/assets/') && !url.pathname.startsWith('/locales/') && !url.pathname.startsWith('/icons/')) return;
+  // Locale files keep their URL across releases. Always ask the network first so
+  // a newly deployed UI cannot be paired with an older cached dictionary.
+  if (url.pathname.startsWith('/locales/')) {
+    event.respondWith(fetch(request).then(response => {
+      if (response.ok && response.type === 'basic') {
+        const copy = response.clone();
+        event.waitUntil(caches.open(CACHE).then(cache => cache.put(request, copy)));
+      }
+      return response;
+    }).catch(() => caches.match(request)));
+    return;
+  }
+  if (!url.pathname.startsWith('/assets/') && !url.pathname.startsWith('/icons/')) return;
   event.respondWith(caches.match(request).then(cached => cached || fetch(request).then(response => {
     if (response.ok && response.type === 'basic') {
       const copy = response.clone();

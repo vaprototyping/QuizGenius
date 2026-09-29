@@ -7,6 +7,7 @@ interface I18nContextType {
 }
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
+const TRANSLATION_VERSION = '20260929-2';
 
 const getNested = (obj: any, path: string): string | undefined => {
   return path.split('.').reduce((acc, part) => acc && acc[part], obj);
@@ -20,9 +21,9 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const fetchTranslations = async () => {
       try {
         const [enRes, nlRes, itRes] = await Promise.all([
-          fetch('/locales/en.json'),
-          fetch('/locales/nl.json'),
-          fetch('/locales/it.json')
+          fetch(`/locales/en.json?v=${TRANSLATION_VERSION}`, { cache: 'no-store' }),
+          fetch(`/locales/nl.json?v=${TRANSLATION_VERSION}`, { cache: 'no-store' }),
+          fetch(`/locales/it.json?v=${TRANSLATION_VERSION}`, { cache: 'no-store' })
         ]);
 
         if (!enRes.ok || !nlRes.ok || !itRes.ok) {
@@ -38,7 +39,7 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       } catch (error) {
         console.error("Failed to load translations:", error);
         try {
-            const enRes = await fetch('/locales/en.json');
+            const enRes = await fetch(`/locales/en.json?v=${TRANSLATION_VERSION}`, { cache: 'no-store' });
             if (!enRes.ok) throw new Error('Failed to fetch English fallback.');
             const en = await enRes.json();
             setTranslations({ en });

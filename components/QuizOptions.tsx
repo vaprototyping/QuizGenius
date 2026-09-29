@@ -181,18 +181,18 @@ export const QuizOptions: React.FC<QuizOptionsProps> = ({
 
       <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
         <button
-          onClick={onBack}
-          className="w-full sm:w-auto px-6 py-3 border border-slate-300 dark:border-slate-600 text-base font-medium rounded-md text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          {t('quizOptions.back')}
-        </button>
-        <button
           onClick={handleSubmit}
           disabled={!profileReady}
           className="w-full sm:w-auto flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           <SparklesIcon className="w-5 h-5 mr-2" />
           {t('quizOptions.generate')}
+        </button>
+        <button
+          onClick={onBack}
+          className="w-full sm:w-auto px-6 py-3 border border-slate-300 dark:border-slate-600 text-base font-medium rounded-md text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          {t('quizOptions.back')}
         </button>
       </div>
     </div>
