@@ -96,7 +96,9 @@
     "pasteTab": "Tekst plakken",
     "pasteLabel": "Plak je leerstof",
     "pastePlaceholder": "Plak hier de les, aantekeningen of het hoofdstuk…",
-    "pasteHint": "Minimaal 50, maximaal 24.000 tekens."
+    "pasteHint": "Minimaal 50, maximaal 24.000 tekens.",
+    "selectedFiles": "Geselecteerde bestanden",
+    "removeFile": "{name} verwijderen"
   },
   "quizOptions": {
     "title": "Pas uw quiz aan",

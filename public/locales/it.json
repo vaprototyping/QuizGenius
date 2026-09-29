@@ -96,7 +96,9 @@
     "pasteTab": "Incolla testo",
     "pasteLabel": "Incolla gli appunti",
     "pastePlaceholder": "Incolla qui la lezione, gli appunti o il capitolo…",
-    "pasteHint": "Da 50 a 24.000 caratteri."
+    "pasteHint": "Da 50 a 24.000 caratteri.",
+    "selectedFiles": "File selezionati",
+    "removeFile": "Rimuovi {name}"
   },
   "quizOptions": {
     "title": "Personalizza il tuo quiz",

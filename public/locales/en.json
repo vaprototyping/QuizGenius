@@ -96,7 +96,9 @@
     "pasteTab": "Paste text instead",
     "pasteLabel": "Paste your study notes",
     "pastePlaceholder": "Paste the lesson, notes, or chapter you want to practise…",
-    "pasteHint": "At least 50 characters, up to 24,000."
+    "pasteHint": "At least 50 characters, up to 24,000.",
+    "selectedFiles": "Selected files",
+    "removeFile": "Remove {name}"
   },
   "quizOptions": {
     "title": "Customize Your Quiz",

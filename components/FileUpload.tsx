@@ -1,4 +1,4 @@
-import React, { useState, useCallback, ChangeEvent, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Language, SubjectType } from '../types';
 import { UploadIcon } from './icons/UploadIcon';
 import { useI18n } from '../context/i18n';
@@ -9,306 +9,100 @@ interface FileUploadProps {
   onTextProcessed: (text: string, language: Language, subject: SubjectType) => void;
 }
 
-const renderPdfToCanvas = async (file: File): Promise<string> => {
-  const fileReader = new FileReader();
-  return new Promise((resolve, reject) => {
-    fileReader.onload = async (event) => {
-      try {
-        const typedarray = new Uint8Array(event.target?.result as ArrayBuffer);
-        // FIX: Access pdfjsLib from the window object to resolve the 'Cannot find name' error.
-        const pdf = await (window as any).pdfjsLib.getDocument(typedarray).promise;
-        const page = await pdf.getPage(1); // Get the first page
-        const viewport = page.getViewport({ scale: 1.5 });
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-
-        if (context) {
-          await page.render({ canvasContext: context, viewport: viewport }).promise;
-          // convert canvas to base64 jpeg
-          resolve(canvas.toDataURL('image/jpeg').split(',')[1]);
-        } else {
-          reject(new Error('Could not get canvas context'));
-        }
-      } catch (error) {
-        reject(error);
-      }
-    };
-    fileReader.onerror = reject;
-    fileReader.readAsArrayBuffer(file);
-  });
-};
+type SelectedFile = { id: number; file: File; thumbnail?: string };
 
 export const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed, onTextProcessed }) => {
   const [inputMode, setInputMode] = useState<'file' | 'text'>('file');
   const [pastedText, setPastedText] = useState('');
-  const [files, setFiles] = useState<File[]>([]);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [previewType, setPreviewType] = useState<'image' | 'pdf' | 'docx' | 'multiple' | null>(null);
+  const [selected, setSelected] = useState<SelectedFile[]>([]);
   const [language, setLanguage] = useState<Language>(Language.English);
   const [subjectType, setSubjectType] = useState<SubjectType>(SubjectType.Text);
   const [error, setError] = useState<string | null>(null);
-  const { t } = useI18n();
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const pickerInputRef = useRef<HTMLInputElement>(null);
+  const filesRef = useRef<SelectedFile[]>([]);
+  const nextId = useRef(0);
+  const { t } = useI18n();
 
-  const buttonLabel = files.length > 0 ? t('fileUpload.analyzeMaterial') : t('fileUpload.extractText');
+  // Each preview belongs to its selection and is released when the item goes away.
+  useEffect(() => {
+    filesRef.current = selected;
+  }, [selected]);
+  useEffect(() => () => filesRef.current.forEach(item => {
+    if (item.thumbnail) URL.revokeObjectURL(item.thumbnail);
+  }), []);
 
-  const handleFileChange = useCallback(
-    async (event: ChangeEvent<HTMLInputElement>) => {
-      const selectedFiles: File[] = Array.from(event.target.files || []);
-
-      if (selectedFiles.length === 0) {
-        setFiles([]);
-        setPreview(null);
-        setPreviewType(null);
-        return;
-      }
-
-      const images = selectedFiles.filter((file) => file.type.startsWith('image/'));
-      const pdfs = selectedFiles.filter((file) => file.type === 'application/pdf');
-      const docxs = selectedFiles.filter((file) => isDocxMime(file.type));
-
-      if (images.length > 0 && (pdfs.length > 0 || docxs.length > 0)) {
-        setError(t('errors.mixedFiles'));
-        setFiles([]);
-        setPreview(null);
-        setPreviewType(null);
-        return;
-      }
-
-      if (images.length > 5) {
-        setError(t('errors.tooManyImages'));
-        setFiles([]);
-        setPreview(null);
-        setPreviewType(null);
-        return;
-      }
-
-      if (pdfs.length + docxs.length > 1) {
-        setError(t('errors.tooManyDocuments'));
-        setFiles([]);
-        setPreview(null);
-        setPreviewType(null);
-        return;
-      }
-
-      if (pdfs.length === 1 && selectedFiles.length > 1) {
-        setError(t('errors.singleDocumentOnly'));
-        setFiles([]);
-        setPreview(null);
-        setPreviewType(null);
-        return;
-      }
-
-      setError(null);
-      setFiles(selectedFiles);
-
-      if (images.length > 1) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setPreview(reader.result as string);
-          setPreviewType('multiple');
-        };
-        reader.readAsDataURL(images[0]);
-        return;
-      }
-
-      const selectedFile = selectedFiles[0];
-
-      if (selectedFile.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setPreview(reader.result as string);
-          setPreviewType('image');
-        };
-        reader.readAsDataURL(selectedFile);
-        return;
-      }
-
-      if (selectedFile.type === 'application/pdf') {
-        setPreview('pdf');
-        setPreviewType('pdf');
-        try {
-          const base64Image = await renderPdfToCanvas(selectedFile);
-          setPreview(`data:image/jpeg;base64,${base64Image}`);
-        } catch (e) {
-          console.error('PDF rendering failed:', e);
-          setError(t('errors.pdfRender'));
-          setFiles([]);
-          setPreview(null);
-          setPreviewType(null);
-        }
-        return;
-      }
-
-      if (isDocxMime(selectedFile.type)) {
-        setPreview(null);
-        setPreviewType('docx');
-        return;
-      }
-
+  const addFiles = (incoming: File[]) => {
+    if (!incoming.length) return;
+    const current = filesRef.current;
+    const isImage = (file: File) => file.type.startsWith('image/');
+    const isDocument = (file: File) => file.type === 'application/pdf' || isDocxMime(file.type);
+    if (incoming.some(file => !isImage(file) && !isDocument(file))) {
       setError(t('errors.unsupportedFile'));
-      setFiles([]);
-      setPreview(null);
-      setPreviewType(null);
-    },
-    [t]
-  );
+      return;
+    }
+    const combined = [...current.map(item => item.file), ...incoming];
+    if (combined.filter(isImage).length > 5) {
+      setError(t('errors.tooManyImages'));
+      return;
+    }
+    if (combined.some(isDocument) && combined.length > 1) {
+      setError(t('errors.mixedFiles'));
+      return;
+    }
+    const items = incoming.map(file => ({ id: nextId.current++, file, thumbnail: isImage(file) ? URL.createObjectURL(file) : undefined }));
+    filesRef.current = [...current, ...items];
+    setSelected(filesRef.current);
+    setError(null);
+  };
 
-  const getPdfPageCount = useCallback(async (file: File): Promise<number> => {
-    const pdfjsLib = (window as any).pdfjsLib;
-    if (!pdfjsLib) return 0;
+  const removeFile = (id: number) => {
+    const removed = filesRef.current.find(item => item.id === id);
+    if (removed?.thumbnail) URL.revokeObjectURL(removed.thumbnail);
+    filesRef.current = filesRef.current.filter(item => item.id !== id);
+    setSelected(filesRef.current);
+    setError(null);
+  };
 
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
-    return pdf.numPages || 0;
-  }, []);
-
-  const handleSubmit = useCallback(async () => {
-    if (files.length === 0) return;
-
-    const documentFile = files.find((file) => file.type === 'application/pdf');
-    if (documentFile) {
-      const pageCount = await getPdfPageCount(documentFile);
-      if (pageCount > 15) {
-        setError(t('errors.pdfPageLimit'));
+  const handleSubmit = async () => {
+    const files = selected.map(item => item.file);
+    if (!files.length) return;
+    const pdf = files.find(file => file.type === 'application/pdf');
+    if (pdf) {
+      try {
+        const pdfjsLib = (window as any).pdfjsLib;
+        const document = await pdfjsLib.getDocument({ data: new Uint8Array(await pdf.arrayBuffer()) }).promise;
+        if (document.numPages > 15) {
+          setError(t('errors.pdfPageLimit'));
+          return;
+        }
+      } catch {
+        setError(t('errors.pdfRender'));
         return;
       }
     }
-
     onFileProcessed(files, language, subjectType);
-  }, [files, language, subjectType, onFileProcessed, t, getPdfPageCount]);
+  };
 
-  return (
-    <div className="upload-panel"><div className="panel-heading"><div><span className="eyebrow">{t('fileUpload.yourMaterial')}</span><h2>{t('fileUpload.title')}</h2><p>{t('fileUpload.subtitle')}</p></div><span className="panel-decoration" aria-hidden="true">✳</span></div><div className="input-tabs"><button className={inputMode === 'file' ? 'active' : ''} type="button" onClick={() => setInputMode('file')}>{t('fileUpload.uploadTab')}</button><button className={inputMode === 'text' ? 'active' : ''} type="button" onClick={() => setInputMode('text')}>{t('fileUpload.pasteTab')}</button></div>{inputMode === 'file' ? <>
-      <label
-        htmlFor="file-upload"
-        className="w-full h-64 border-2 border-dashed border-violet-300 dark:border-violet-600 rounded-3xl flex flex-col items-center justify-center cursor-pointer bg-white/80 dark:bg-slate-800/70 hover:bg-violet-50 dark:hover:bg-slate-700/70 transition-colors shadow-lg shadow-violet-100/50 dark:shadow-none"
-      >
-        {preview ? (
-          preview === 'pdf' ? (
-            <div className="text-center">
-              <p className="text-slate-500 dark:text-slate-400">{t('fileUpload.renderingPdf')}</p>
-            </div>
-          ) : (
-            <div className="relative flex items-center justify-center w-full h-full">
-              <img src={preview} alt="File preview" className="max-h-full max-w-full object-contain rounded-md" />
-              {previewType === 'multiple' && files.length > 1 && (
-                <span className="absolute bottom-2 right-2 bg-indigo-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
-                  {t('fileUpload.multipleCount', { count: files.length })}
-                </span>
-              )}
-            </div>
-          )
-        ) : previewType === 'docx' ? (
-          <div className="text-center">
-            <UploadIcon className="mx-auto h-12 w-12 text-slate-400" />
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{t('fileUpload.docxReady')}</p>
-          </div>
-        ) : (
-          <div className="text-center space-y-3">
-            <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400">
-              <span className="text-xl" aria-hidden>🖼️</span>
-              <span className="text-xl" aria-hidden>📄</span>
-            </div>
-            <UploadIcon className="mx-auto h-12 w-12 text-slate-400" />
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              <span className="font-semibold text-indigo-500">{t('fileUpload.clickToUpload')}</span> {t('fileUpload.dragAndDrop')}
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">{t('fileUpload.fileTypes')}</p>
-          </div>
-        )}
+  return <div className="upload-panel">
+    <div className="panel-heading"><div><span className="eyebrow">{t('fileUpload.yourMaterial')}</span><h2>{t('fileUpload.title')}</h2><p>{t('fileUpload.subtitle')}</p></div><span className="panel-decoration" aria-hidden="true">✳</span></div>
+    <div className="input-tabs"><button className={inputMode === 'file' ? 'active' : ''} type="button" onClick={() => setInputMode('file')}>{t('fileUpload.uploadTab')}</button><button className={inputMode === 'text' ? 'active' : ''} type="button" onClick={() => setInputMode('text')}>{t('fileUpload.pasteTab')}</button></div>
+    {inputMode === 'file' ? <>
+      <label htmlFor="file-upload" className="upload-dropzone" onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); addFiles(Array.from(event.dataTransfer.files)); }}>
+        <span className="upload-illustration" aria-hidden="true">🖼️ &nbsp; 📄</span><UploadIcon className="h-11 w-11" />
+        <span><strong>{t('fileUpload.clickToUpload')}</strong> {t('fileUpload.dragAndDrop')}</span>
+        <small>{t('fileUpload.fileTypes')}</small>
       </label>
-      <input
-        id="file-upload"
-        name="file-upload"
-        type="file"
-        className="sr-only"
-        onChange={handleFileChange}
-        accept="image/*,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        multiple
-      />
-      <input
-        id="camera-upload"
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="sr-only"
-        onChange={handleFileChange}
-      />
-      {files.length === 0 && (
-        <div className="mt-4 w-full max-w-lg">
-          <button
-            type="button"
-            onClick={() => cameraInputRef.current?.click()}
-            className="w-full whitespace-nowrap px-4 py-2 border border-slate-300 dark:border-slate-600 text-sm font-medium rounded-md shadow-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            {t('fileUpload.useCamera')}
-          </button>
-          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 text-center">
-            {t('fileUpload.cameraDescription')}
-          </p>
-        </div>
-      )}
-      </> : <div className="paste-area"><label htmlFor="study-text">{t('fileUpload.pasteLabel')}</label><textarea id="study-text" rows={8} value={pastedText} onChange={e => setPastedText(e.target.value)} placeholder={t('fileUpload.pastePlaceholder')} /><p>{t('fileUpload.pasteHint')}</p></div>}
-      {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
-
-      {inputMode === 'file' && files.length > 0 && (
-        <div className="mt-6 w-full max-w-lg">
-          <p className="text-center truncate text-sm text-slate-500 dark:text-slate-400 mb-4">
-            {files.length === 1 ? files[0].name : t('fileUpload.multipleFiles', { count: files.length })}
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('fileUpload.subjectType')}</label>
-              <div className="flex rounded-md shadow-sm">
-                {Object.values(SubjectType).map((type, idx) => (
-                  <button
-                    key={type}
-                    onClick={() => setSubjectType(type as SubjectType)}
-                    className={`px-4 py-2 text-sm font-medium border border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:z-10 w-full
-                        ${subjectType === type ? 'bg-indigo-500 text-white' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'}
-                        ${idx === 0 ? 'rounded-l-md' : ''}
-                        ${idx === Object.values(SubjectType).length -1 ? 'rounded-r-md' : ''}
-                        `}
-                  >
-                    {t(`enums.subjectType.${type}`)}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label htmlFor="language" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                {t('fileUpload.documentLanguage')}
-              </label>
-              <select
-                id="language"
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as Language)}
-                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-              >
-                {[Language.English, Language.Dutch, Language.Italian].map((lang) => (
-                  <option key={lang} value={lang}>
-                    {lang}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="mt-4">
-            <button
-              onClick={handleSubmit}
-              disabled={files.length === 0}
-              className="w-full whitespace-nowrap px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-slate-400 disabled:cursor-not-allowed"
-            >
-              {buttonLabel}
-            </button>
-          </div>
-        </div>
-      )}
-      {inputMode === 'text' && <div className="paste-footer"><div className="input-row"><label>{t('fileUpload.subjectType')}<select value={subjectType} onChange={e => setSubjectType(e.target.value as SubjectType)}>{Object.values(SubjectType).map(v => <option key={v} value={v}>{t(`enums.subjectType.${v}`)}</option>)}</select></label><label>{t('fileUpload.documentLanguage')}<select value={language} onChange={e => setLanguage(e.target.value as Language)}>{[Language.English,Language.Dutch,Language.Italian].map(v => <option key={v} value={v}>{v}</option>)}</select></label></div><button className="primary-button" type="button" disabled={pastedText.trim().length < 50 || pastedText.length > 24000} onClick={() => onTextProcessed(pastedText,language,subjectType)}>{t('fileUpload.analyzeMaterial')} <span aria-hidden="true">→</span></button></div>}
-    </div>
-  );
+      <input ref={pickerInputRef} id="file-upload" type="file" className="sr-only" accept="image/*,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple onChange={event => { addFiles(Array.from(event.target.files || [])); event.target.value = ''; }} />
+      <input ref={cameraInputRef} id="camera-upload" type="file" accept="image/*" capture="environment" className="sr-only" onChange={event => { addFiles(Array.from(event.target.files || [])); event.target.value = ''; }} />
+      <div className="camera-action"><button type="button" className="secondary-button" onClick={() => cameraInputRef.current?.click()}>{t('fileUpload.useCamera')}</button><p>{t('fileUpload.cameraDescription')}</p></div>
+      {selected.length > 0 && <section className="selected-files" aria-label={t('fileUpload.selectedFiles')}><div className="selected-heading"><h3>{t('fileUpload.selectedFiles')}</h3><span>{selected.length} / 5</span></div><ul>{selected.map(({ id, file, thumbnail }) => <li key={id}>
+        {thumbnail ? <img src={thumbnail} alt="" /> : <span className="document-thumb" aria-hidden="true">📄</span>}
+        <span className="file-name" title={file.name}>{file.name}</span>
+        <button type="button" onClick={() => removeFile(id)} aria-label={t('fileUpload.removeFile', { name: file.name })} title={t('fileUpload.removeFile', { name: file.name })}>×</button>
+      </li>)}</ul></section>}
+      {error && <p role="alert" className="upload-error">{error}</p>}
+      {selected.length > 0 && <div className="file-settings"><div className="input-row"><label>{t('fileUpload.subjectType')}<select value={subjectType} onChange={event => setSubjectType(event.target.value as SubjectType)}>{Object.values(SubjectType).map(value => <option key={value} value={value}>{t(`enums.subjectType.${value}`)}</option>)}</select></label><label>{t('fileUpload.documentLanguage')}<select value={language} onChange={event => setLanguage(event.target.value as Language)}>{[Language.English, Language.Dutch, Language.Italian].map(value => <option key={value} value={value}>{value}</option>)}</select></label></div><button type="button" className="primary-button" onClick={handleSubmit}>{t('fileUpload.analyzeMaterial')} <span aria-hidden="true">→</span></button></div>}
+    </> : <><div className="paste-area"><label htmlFor="study-text">{t('fileUpload.pasteLabel')}</label><textarea id="study-text" rows={8} value={pastedText} onChange={event => setPastedText(event.target.value)} placeholder={t('fileUpload.pastePlaceholder')} /><p>{t('fileUpload.pasteHint')}</p></div><div className="paste-footer"><div className="input-row"><label>{t('fileUpload.subjectType')}<select value={subjectType} onChange={event => setSubjectType(event.target.value as SubjectType)}>{Object.values(SubjectType).map(value => <option key={value} value={value}>{t(`enums.subjectType.${value}`)}</option>)}</select></label><label>{t('fileUpload.documentLanguage')}<select value={language} onChange={event => setLanguage(event.target.value as Language)}>{[Language.English, Language.Dutch, Language.Italian].map(value => <option key={value} value={value}>{value}</option>)}</select></label></div><button className="primary-button" type="button" disabled={pastedText.trim().length < 50 || pastedText.length > 24000} onClick={() => onTextProcessed(pastedText, language, subjectType)}>{t('fileUpload.analyzeMaterial')} <span aria-hidden="true">→</span></button></div></>}
+  </div>;
 };
