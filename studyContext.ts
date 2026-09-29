@@ -10,6 +10,9 @@ export const SUBJECT_KEYS = SUBJECT_GROUPS.flatMap(group => group.subjects);
 export type SubjectKey = (typeof SUBJECT_KEYS)[number];
 export type SchoolType = 'primary' | 'middle' | 'high' | 'college';
 export type StudentProfile = { age: number | null; schoolType: SchoolType | ''; year: number | null };
+export const EMPTY_STUDENT_PROFILE: StudentProfile = { age: null, schoolType: '', year: null };
+export const isStudentProfileReady = (profile: StudentProfile) => Number.isInteger(profile.age) && profile.age! >= 5 && profile.age! <= 99 &&
+  ['primary', 'middle', 'high', 'college'].includes(profile.schoolType) && Number.isInteger(profile.year) && profile.year! >= 1 && profile.year! <= 8;
 
 export const SUBJECT_NAMES: Record<SubjectKey, string> = {
   languageArts: 'Language arts', english: 'English language', dutch: 'Dutch language', italian: 'Italian language',

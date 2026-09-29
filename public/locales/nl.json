@@ -128,6 +128,18 @@
     "yearValue": "Leerjaar {year}",
     "subjectSummary": "Gekozen vak"
   },
+  "studentFlow": {
+    "profile": "Leerlingprofiel",
+    "savedOnDevice": "Op dit apparaat bewaard voor je volgende quiz. Je kunt dit altijd aanpassen.",
+    "analyzing": "We lezen je materiaal terwijl je de leerling instelt…",
+    "ready": "Materiaal klaar. Ga verder zodra het leerlingprofiel compleet is.",
+    "changeMaterial": "Materiaal wijzigen",
+    "continue": "Verder naar quizinstellingen",
+    "edit": "Profiel aanpassen",
+    "close": "Profiel sluiten",
+    "clear": "Profiel wissen",
+    "done": "Klaar"
+  },
   "quizDisplay": {
     "description": "Beantwoord de volgende vragen naar uw beste vermogen.",
     "placeholder": "Uw antwoord hier...",

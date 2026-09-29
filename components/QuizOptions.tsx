@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Language, QuizType, SubjectType, QuizOptions as QuizOptionsType, MathQuizType, Difficulty, TextQuizOptions, MathQuizOptions } from '../types';
 import { SparklesIcon } from './icons/SparklesIcon';
 import { useI18n } from '../context/i18n';
-import { StudentProfile, SubjectKey } from '../studyContext';
+import { StudentProfile, SubjectKey, isStudentProfileReady } from '../studyContext';
 
 interface QuizOptionsProps {
   extractedText: string;
@@ -11,7 +11,7 @@ interface QuizOptionsProps {
   onQuizGenerate: (options: QuizOptionsType) => void;
   onBack: () => void;
   studentProfile: StudentProfile;
-  onStudentProfileChange: (profile: StudentProfile) => void;
+  onEditProfile: () => void;
   studySubject: SubjectKey;
   customSubject?: string;
 }
@@ -23,7 +23,7 @@ export const QuizOptions: React.FC<QuizOptionsProps> = ({
   onQuizGenerate,
   onBack,
   studentProfile,
-  onStudentProfileChange,
+  onEditProfile,
   studySubject,
   customSubject,
 }) => {
@@ -46,8 +46,7 @@ export const QuizOptions: React.FC<QuizOptionsProps> = ({
   const [difficulty, setDifficulty] = useState<Difficulty>(Difficulty.Medium);
 
   const { t } = useI18n();
-  const profileReady = studentProfile.age !== null && studentProfile.age >= 5 && studentProfile.age <= 99 &&
-    studentProfile.schoolType !== '' && studentProfile.year !== null && studentProfile.year >= 1 && studentProfile.year <= 8;
+  const profileReady = isStudentProfileReady(studentProfile);
 
   const handleSubmit = () => {
     if (!profileReady) return;
@@ -158,17 +157,7 @@ export const QuizOptions: React.FC<QuizOptionsProps> = ({
         </div>
       </div>
 
-      <section className="student-card">
-        <span className="eyebrow">{t('quizOptions.learnerStep')}</span>
-        <h3>{t('quizOptions.studentTitle')}</h3>
-        <p>{t('quizOptions.studentDescription')}</p>
-        <div className="student-fields">
-          <label htmlFor="student-age">{t('quizOptions.age')}<input id="student-age" type="number" min="5" max="99" inputMode="numeric" value={studentProfile.age ?? ''} onChange={event => onStudentProfileChange({ ...studentProfile, age: event.target.value === '' ? null : Number(event.target.value) })} placeholder={t('quizOptions.agePlaceholder')} /></label>
-          <label htmlFor="school-type">{t('quizOptions.schoolType')}<select id="school-type" value={studentProfile.schoolType} onChange={event => onStudentProfileChange({ ...studentProfile, schoolType: event.target.value as StudentProfile['schoolType'] })}><option value="">{t('quizOptions.chooseSchoolType')}</option>{(['primary', 'middle', 'high', 'college'] as const).map(value => <option key={value} value={value}>{t(`schoolTypes.${value}`)}</option>)}</select></label>
-          <label htmlFor="school-year">{t('quizOptions.year')}<select id="school-year" value={studentProfile.year ?? ''} onChange={event => onStudentProfileChange({ ...studentProfile, year: event.target.value ? Number(event.target.value) : null })}><option value="">{t('quizOptions.chooseYear')}</option>{Array.from({length: 8}, (_, index) => index + 1).map(value => <option key={value} value={value}>{t('quizOptions.yearValue', {year:value})}</option>)}</select></label>
-        </div>
-        <p className="subject-summary">{t('quizOptions.subjectSummary')}: <strong>{studySubject === 'other' ? customSubject : t(`subjects.${studySubject}`)}</strong></p>
-      </section>
+      <section className="profile-summary"><span>♙ {t('quizOptions.studentTitle')} <strong>{studentProfile.age} · {t(`schoolTypes.${studentProfile.schoolType}`)} · {t('quizOptions.yearValue', { year: studentProfile.year })}</strong></span><button type="button" onClick={onEditProfile}>{t('studentFlow.edit')}</button><span>{t('quizOptions.subjectSummary')}: <strong>{studySubject === 'other' ? customSubject : t(`subjects.${studySubject}`)}</strong></span></section>
 
       <div className="mt-5 bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-lg border border-violet-100 dark:border-slate-700">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

@@ -128,6 +128,18 @@
     "yearValue": "Anno {year}",
     "subjectSummary": "Materia scelta"
   },
+  "studentFlow": {
+    "profile": "Profilo studente",
+    "savedOnDevice": "Salvato su questo dispositivo per il prossimo quiz. Puoi modificarlo quando vuoi.",
+    "analyzing": "Stiamo leggendo il materiale mentre imposti lo studente…",
+    "ready": "Materiale pronto. Continua quando il profilo studente è completo.",
+    "changeMaterial": "Cambia materiale",
+    "continue": "Continua alla configurazione",
+    "edit": "Modifica profilo",
+    "close": "Chiudi profilo",
+    "clear": "Cancella profilo",
+    "done": "Fatto"
+  },
   "quizDisplay": {
     "description": "Rispondi alle seguenti domande al meglio delle tue capacità.",
     "placeholder": "La tua risposta qui...",

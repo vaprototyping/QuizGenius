@@ -128,6 +128,18 @@
     "yearValue": "Year {year}",
     "subjectSummary": "Selected subject"
   },
+  "studentFlow": {
+    "profile": "Student profile",
+    "savedOnDevice": "Saved on this device for your next quiz. You can edit it anytime.",
+    "analyzing": "Reading your material while you set up the student…",
+    "ready": "Material ready. Continue when the student profile is complete.",
+    "changeMaterial": "Change material",
+    "continue": "Continue to quiz setup",
+    "edit": "Edit profile",
+    "close": "Close profile",
+    "clear": "Clear profile",
+    "done": "Done"
+  },
   "quizDisplay": {
     "description": "Answer the following questions to the best of your ability.",
     "placeholder": "Your answer here...",

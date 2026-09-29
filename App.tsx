@@ -1,12 +1,13 @@
-import React, { useState, useCallback, useRef, FormEvent } from 'react';
+import React, { useState, useCallback, useRef, useEffect, FormEvent } from 'react';
 import { FileUpload } from './components/FileUpload';
 import { QuizOptions as QuizOptionsComponent } from './components/QuizOptions';
 import { QuizDisplay } from './components/QuizDisplay';
 import { QuizResults } from './components/QuizResults';
 import { LanguageSelector } from './components/LanguageSelector';
 import { ThemeSelector } from './components/ThemeSelector';
-import { extractTextFromUploads, ImageQualityError, isDocxMime } from './services/textExtractionService';
-import { StudentProfile, SubjectKey } from './studyContext';
+import { StudentProfileForm } from './components/StudentProfileForm';
+import { extractTextFromUploads, ImageQualityError } from './services/textExtractionService';
+import { StudentProfile, SubjectKey, EMPTY_STUDENT_PROFILE, isStudentProfileReady } from './studyContext';
 import {
   Quiz,
   Language,
@@ -14,7 +15,6 @@ import {
   QuizOptions,
   QuizType,
   Question,
-  TextQuizOptions
 } from './types';
 import { useI18n } from './context/i18n';
 import { generateQuiz as generateQuizAPI, QuizApiError } from './src/lib/api';
@@ -30,7 +30,7 @@ function mapQuizType(opts: QuizOptions): "mcq" | "true_false" | "open" {
 }
 
 const App: React.FC = () => {
-  const [step, setStep] = useState<'upload' | 'options' | 'quiz' | 'results' | 'loading'>('upload');
+  const [step, setStep] = useState<'upload' | 'profile' | 'options' | 'quiz' | 'results' | 'loading'>('upload');
   const [error, setError] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<QuizApiError | null>(null);
   const [extractedText, setExtractedText] = useState<string | null>(null);
@@ -42,7 +42,15 @@ const App: React.FC = () => {
   const [studySubject, setStudySubject] = useState<SubjectKey | ''>('');
   const [customSubject, setCustomSubject] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [studentProfile, setStudentProfile] = useState<StudentProfile>({ age: null, schoolType: '', year: null });
+  const [studentProfile, setStudentProfile] = useState<StudentProfile>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('qwitzme-student-profile-v1') || 'null');
+      return saved && isStudentProfileReady(saved) ? saved : EMPTY_STUDENT_PROFILE;
+    } catch { return EMPTY_STUDENT_PROFILE; }
+  });
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [extractionStatus, setExtractionStatus] = useState<'idle' | 'processing' | 'ready' | 'failed'>('idle');
+  const extractionRunRef = useRef(0);
   const [mode, setMode] = useState<'student' | 'parent'>('student');
   const [accessCode, setAccessCode] = useState('');
   const [accessInput, setAccessInput] = useState('');
@@ -59,14 +67,15 @@ const App: React.FC = () => {
     | null
   >(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const getPdfPageCount = useCallback(async (file: File): Promise<number> => {
-    const pdfjsLib = (window as any).pdfjsLib;
-    if (!pdfjsLib) return 0;
-
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
-    return pdf.numPages || 0;
-  }, []);
+  useEffect(() => {
+    try { localStorage.setItem('qwitzme-student-profile-v1', JSON.stringify(studentProfile)); } catch { /* Storage may be unavailable. */ }
+  }, [studentProfile]);
+  useEffect(() => {
+    if (!profileOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') setProfileOpen(false); };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [profileOpen]);
   const stopProgressSimulation = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -99,7 +108,10 @@ const App: React.FC = () => {
     }, intervalDuration);
   }, [stopProgressSimulation]);
   const handleFileProcessed = async (selectedFiles: File[], lang: Language, subject: SubjectType, selectedSubject: SubjectKey, otherSubject?: string) => {
-    setStep('loading');
+    const run = ++extractionRunRef.current;
+    setStep('profile');
+    setExtractionStatus('processing');
+    setExtractedText(null);
     setUploadedFiles(selectedFiles);
     setError(null);
     setErrorDetails(null);
@@ -108,43 +120,25 @@ const App: React.FC = () => {
     setStudySubject(selectedSubject);
     setCustomSubject(otherSubject || '');
     const images = selectedFiles.filter((file) => file.type.startsWith('image/'));
-    const pdfFile = selectedFiles.find((file) => file.type === 'application/pdf');
-    const docxFile = selectedFiles.find((file) => isDocxMime(file.type));
-    if (images.length > 0) {
-      setProcessingDetails({ type: 'images', totalItems: images.length });
-    } else if (pdfFile) {
-      setProcessingDetails({ type: 'pdf', totalPages: 1 });
-    } else if (docxFile) {
-      setProcessingDetails({ type: 'docx' });
-    }
-    const duration = Math.min(15, Math.max(6, selectedFiles.length * 3));
-    startProgressSimulation([t('loading.analyzing'), t('loading.extracting'), t('loading.finalizing')], duration);
     try {
-      if (pdfFile) {
-        const pageCount = await getPdfPageCount(pdfFile);
-        setProcessingDetails({ type: 'pdf', totalPages: Math.max(1, pageCount) });
-      }
       const text = await extractTextFromUploads(selectedFiles, lang, subject);
+      if (run !== extractionRunRef.current) return;
       if (!text || text.trim().length < 50) throw new Error(t(images.length ? 'errors.lowQualityImage' : 'errors.tooLittleText'));
       if (text.length > 24000) throw new Error(t('errors.tooMuchText'));
-      stopProgressSimulation();
-      setProgress(100);
-      setLoadingMessage(t('loading.extractionComplete'));
       setExtractedText(text ?? '');
-      setProcessingDetails(null);
-      setTimeout(() => setStep('options'), 500);
+      setExtractionStatus('ready');
     } catch (e) {
-      stopProgressSimulation();
+      if (run !== extractionRunRef.current) return;
       console.error(e);
       setError(e instanceof ImageQualityError ? t('errors.lowQualityImageNumber', {number: e.imageNumber}) : e instanceof Error ? e.message : t('errors.unknownExtraction'));
-      setProcessingDetails(null);
-      setStep('upload');
+      setExtractionStatus('failed');
     }
   };
   const handleTextProcessed = (text: string, lang: Language, subject: SubjectType, selectedSubject: SubjectKey, otherSubject?: string) => {
     const clean = text.trim();
     if (clean.length < 50 || clean.length > 24000) { setError(t(clean.length < 50 ? 'errors.tooLittleText' : 'errors.tooMuchText')); return; }
-    setUploadedFiles([]); setExtractedText(clean); setLanguage(lang); setSubjectType(subject); setStudySubject(selectedSubject); setCustomSubject(otherSubject || ''); setError(null); setStep('options');
+    ++extractionRunRef.current;
+    setUploadedFiles([]); setExtractedText(clean); setExtractionStatus('ready'); setLanguage(lang); setSubjectType(subject); setStudySubject(selectedSubject); setCustomSubject(otherSubject || ''); setError(null); setStep('profile');
   };
   const handleQuizGenerate = async (options: QuizOptions) => {
     if (!extractedText) return;
@@ -211,6 +205,7 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const handleRestart = () => {
+    ++extractionRunRef.current;
     stopProgressSimulation();
     setStep('upload');
     setError(null);
@@ -219,7 +214,7 @@ const App: React.FC = () => {
     setUploadedFiles([]);
     setStudySubject('');
     setCustomSubject('');
-    setStudentProfile({ age: null, schoolType: '', year: null });
+    setExtractionStatus('idle');
     setQuiz(null);
     setUserAnswers({});
     setCurrentQuizOptions(null);
@@ -243,7 +238,7 @@ const App: React.FC = () => {
     } catch { setAccessError(t('app.accessUnavailable')); }
     finally { setCheckingAccess(false); }
   };
-  const chrome = <><span className="wordmark"><span className="brand-spark" aria-hidden="true">✳</span> QwitzMe<span className="brand-dot">.ai</span></span><div className="header-actions"><LanguageSelector /><ThemeSelector /></div></>;
+  const chrome = <><span className="wordmark"><span className="brand-spark" aria-hidden="true">✳</span> QwitzMe<span className="brand-dot">.ai</span></span><div className="header-actions">{accessCode && <button className="icon-button profile-trigger" type="button" title={t('studentFlow.profile')} aria-label={t('studentFlow.profile')} onClick={() => setProfileOpen(true)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/></svg></button>}<LanguageSelector /><ThemeSelector /></div></>;
   if (!accessCode) return <div className="app-shell"><header className="site-header">{chrome}</header><main className="gate-layout">
     <section className="gate-story"><span className="eyebrow">{t('app.eyebrow')}</span><h1>{t('app.heroTitle')}</h1><p className="hero-copy">{t('app.heroCopy')}</p><div className="journey-chips">{[t('app.addNotes'), t('app.takeQuiz'), t('app.learnWhy')].map((label, index) => <span key={label}><b aria-hidden="true">{index + 1}</b>{label}</span>)}</div>
     <div className="sample-card" aria-hidden="true"><div className="sample-heading"><span className="sample-badge">✦ {t('app.sampleLabel')}</span><span>01 / 05</span></div><p>{t('app.sampleQuestion')}</p><div className="sample-choice">A &nbsp; {t('app.sampleAnswerA')}</div><div className="sample-choice selected">B &nbsp; {t('app.sampleAnswerB')} <span>✓</span></div></div></section>
@@ -292,6 +287,10 @@ const App: React.FC = () => {
     }
     const errorMessage = error && <div role="alert" className="flow-error"><strong>{step === 'upload' ? t('errors.photoHelpTitle') : t('generationErrors.title')}</strong><p>{error}</p>{errorDetails && <details className="generation-diagnostics"><summary>{t('generationErrors.details')}</summary><ul>{errorDetails.attempts.map((attempt, index) => <li key={`${attempt.provider}-${index}`}><strong>{attempt.provider}</strong>: {t(`generationErrors.${attempt.code}`)}{attempt.status ? ` (HTTP ${attempt.status})` : ''}</li>)}</ul>{errorDetails.fallbackConfigured === false && <p>{t('generationErrors.noFallback')}</p>}{errorDetails.requestId && <p>{t('generationErrors.reference')}: <code>{errorDetails.requestId}</code></p>}</details>}</div>;
     switch (step) {
+      case 'profile':
+        return <div className="profile-stage"><section className="student-card"><span className="eyebrow">{t('quizOptions.learnerStep')}</span><h2>{t('quizOptions.studentTitle')}</h2><p>{t('quizOptions.studentDescription')}</p><StudentProfileForm profile={studentProfile} onChange={setStudentProfile} idPrefix="learner"/><p className="subject-summary">{t('quizOptions.subjectSummary')}: <strong>{studySubject === 'other' ? customSubject : t(`subjects.${studySubject}`)}</strong></p><p className="profile-storage-note">{t('studentFlow.savedOnDevice')}</p></section>
+          <div className={`extraction-state ${extractionStatus === 'failed' ? 'failed' : ''}`} role="status" aria-live="polite">{extractionStatus === 'processing' ? <><span className="small-spinner" aria-hidden="true"/>{t('studentFlow.analyzing')}</> : extractionStatus === 'ready' ? <>✓ {t('studentFlow.ready')}</> : extractionStatus === 'failed' ? <>{error}<button type="button" className="secondary-button" onClick={() => { ++extractionRunRef.current; setStep('upload'); }}>{t('studentFlow.changeMaterial')}</button></> : null}</div>
+          <div className="profile-actions"><button type="button" className="secondary-button" onClick={() => { ++extractionRunRef.current; setStep('upload'); }}>{t('quizOptions.back')}</button><button type="button" className="primary-button" disabled={!isStudentProfileReady(studentProfile) || extractionStatus !== 'ready'} onClick={() => setStep('options')}>{t('studentFlow.continue')}</button></div></div>;
       case 'upload':
         return <>{errorMessage}<FileUpload initialFiles={uploadedFiles} initialLanguage={language} initialFocus={subjectType} initialStudySubject={studySubject} initialCustomSubject={customSubject} onMaterialChange={() => setError(null)} onFileProcessed={handleFileProcessed} onTextProcessed={handleTextProcessed} /></>;
       case 'options':
@@ -301,11 +300,11 @@ const App: React.FC = () => {
             initialLanguage={language} 
             initialSubjectType={subjectType}
             studentProfile={studentProfile}
-            onStudentProfileChange={setStudentProfile}
+            onEditProfile={() => setProfileOpen(true)}
             studySubject={studySubject as SubjectKey}
             customSubject={customSubject}
             onQuizGenerate={handleQuizGenerate} 
-            onBack={handleRestart}
+            onBack={() => setStep('profile')}
           /></>;
         }
         handleRestart();
@@ -336,11 +335,12 @@ const App: React.FC = () => {
         return <FileUpload initialFiles={uploadedFiles} initialLanguage={language} initialFocus={subjectType} initialStudySubject={studySubject} initialCustomSubject={customSubject} onMaterialChange={() => setError(null)} onFileProcessed={handleFileProcessed} onTextProcessed={handleTextProcessed} />;
     }
   };
-  const stage = step === 'upload' ? 0 : step === 'options' || (step === 'loading' && !quiz) ? 1 : step === 'quiz' ? 2 : 3;
+  const stage = step === 'upload' ? 0 : step === 'profile' || step === 'options' || (step === 'loading' && !quiz) ? 1 : step === 'quiz' ? 2 : 3;
   return <div className="app-shell"><header className="site-header">{chrome}</header><main className="workspace">
     <nav className="steps" aria-label={t('app.progressLabel')}>{[t('app.addNotes'), t('app.setUp'), t('app.takeQuiz'), t('app.review')].map((label, index) => <div key={label} className={`step-chip ${stage === index ? 'active' : ''} ${stage > index ? 'complete' : ''}`}><span>{stage > index ? '✓' : index + 1}</span><span>{label}</span></div>)}</nav>
     {step === 'upload' && <div className="upload-intro"><span className="eyebrow">{t('app.eyebrow')}</span><h1>{t('app.workspaceTitle')}</h1><p>{t('app.workspaceCopy')}</p><div className="mode-switch" role="group" aria-label={t('app.modeLabel')}>{(['student','parent'] as const).map(value => <button key={value} type="button" onClick={() => setMode(value)} aria-pressed={mode === value} className={mode === value ? 'selected' : ''}>{value === 'student' ? '✏' : '♥'} &nbsp;{t(`app.${value}Mode`)}</button>)}</div><p className="mode-description">{t(`app.${mode}Description`)}</p></div>}
     <div className="stage-content">{renderContent()}</div>
+    {profileOpen && <div className="profile-overlay" onMouseDown={event => { if (event.target === event.currentTarget) setProfileOpen(false); }}><section className="student-card profile-dialog" role="dialog" aria-modal="true" aria-labelledby="profile-dialog-title"><button className="profile-close" type="button" onClick={() => setProfileOpen(false)} aria-label={t('studentFlow.close')}>×</button><h2 id="profile-dialog-title">{t('studentFlow.profile')}</h2><p>{t('quizOptions.studentDescription')}</p><StudentProfileForm profile={studentProfile} onChange={setStudentProfile} idPrefix="profile-dialog"/><p className="profile-storage-note">{t('studentFlow.savedOnDevice')}</p><div className="profile-actions"><button className="secondary-button" type="button" onClick={() => setStudentProfile(EMPTY_STUDENT_PROFILE)}>{t('studentFlow.clear')}</button><button className="primary-button" type="button" onClick={() => setProfileOpen(false)}>{t('studentFlow.done')}</button></div></section></div>}
   </main></div>;
 };
 export default App;
