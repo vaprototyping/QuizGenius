@@ -5,7 +5,44 @@
     "errorTitle": "An Error Occurred",
     "errorGeneric": "Something went wrong.",
     "startOver": "Start Over",
-    "submit": "Submit Quiz"
+    "submit": "Submit Quiz",
+    "modeLabel": "Choose how you will use the quiz",
+    "studentMode": "I am studying",
+    "parentMode": "I am helping a child",
+    "studentDescription": "Practice independently and learn from every answer.",
+    "parentDescription": "Turn study material into questions you can discuss together.",
+    "howItWorks": "Three simple steps",
+    "uploadStep": "Add study material",
+    "extractStep": "We read the content",
+    "quizStep": "Practice with a quiz",
+    "theme": "Theme",
+    "theme_system": "System",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "accessPrompt": "Enter your access code to start practicing.",
+    "accessLabel": "Access code",
+    "continue": "Continue",
+    "invalidAccess": "That code did not work. Try again.",
+    "accessUnavailable": "Access is temporarily unavailable. Please try again later.",
+    "eyebrow": "YOUR STUDY COMPANION",
+    "heroTitle": "From study notes to “I’ve got this.”",
+    "heroCopy": "Upload a page of notes, practise with a quiz made for you, and learn from every answer. For students and the parents helping them.",
+    "addNotes": "Add material",
+    "takeQuiz": "Practise",
+    "learnWhy": "Learn why",
+    "sampleLabel": "A LITTLE PREVIEW",
+    "sampleQuestion": "What helps you remember what you studied?",
+    "sampleAnswerA": "Reading it one more time",
+    "sampleAnswerB": "Trying to recall it",
+    "readyTitle": "Ready to give it a try?",
+    "accessNote": "Your access code lets you into the preview.",
+    "switchLight": "Switch to light mode",
+    "switchDark": "Switch to dark mode",
+    "progressLabel": "Quiz progress",
+    "setUp": "Set up",
+    "review": "Review",
+    "workspaceTitle": "What are we learning today?",
+    "workspaceCopy": "Start with a photo or document of your study material. We’ll make a quiz from it."
   },
   "loading": {
     "thinking": "AI is thinking...",
@@ -17,7 +54,11 @@
     "crafting": "Crafting insightful questions...",
     "developing": "Developing answer keys...",
     "assembling": "Assembling your quiz...",
-    "quizGenerated": "Quiz generated!"
+    "quizGenerated": "Quiz generated!",
+    "processingImage": "Processing image {current} of {total}…",
+    "processingPage": "Processing page {current} of {total}…",
+    "processingDocument": "Processing document…",
+    "mightTakeMinute": "This might take a minute."
   },
   "errors": {
     "unknownExtraction": "An unknown error occurred during text extraction.",
@@ -29,14 +70,19 @@
     "tooManyImages": "You can upload up to 5 images at a time.",
     "tooManyDocuments": "Only one document (PDF or DOCX) can be uploaded at once.",
     "singleDocumentOnly": "A PDF or DOCX must be uploaded alone, not with other files.",
-    "pdfPageLimit": "PDFs are limited to 15 pages. Please upload a shorter document."
+    "pdfPageLimit": "PDFs are limited to 15 pages. Please upload a shorter document.",
+    "tooLittleText": "We could not read enough text. Try a clearer image or a document with selectable text.",
+    "tooMuchText": "This material is too long. Try a shorter document or fewer images.",
+    "lowQualityImage": "This photo is too blurry or has too little readable text. Please upload a clearer image with the whole page in focus.",
+    "lowQualityImageNumber": "Image {number} is too blurry or has too little readable text. Please replace it with a clearer photo.",
+    "photoHelpTitle": "Check your material"
   },
   "fileUpload": {
     "renderingPdf": "Rendering PDF preview...",
     "clickToUpload": "Click to upload",
     "dragAndDrop": "or drag and drop",
     "fileTypes": "Up to 5 images, or one PDF/DOCX (max 15 pages)",
-    "subjectType": "Subject Type",
+    "subjectType": "Practice focus",
     "documentLanguage": "Document Language",
     "extractText": "Extract Text",
     "analyzeMaterial": "Analyze Material",
@@ -44,7 +90,20 @@
     "cameraDescription": "Capture a new picture using your phone or tablet camera.",
     "multipleCount": "+{count}",
     "multipleFiles": "{count} files selected",
-    "docxReady": "DOCX selected and ready"
+    "docxReady": "DOCX selected and ready",
+    "yourMaterial": "STEP 01 · YOUR MATERIAL",
+    "title": "Bring your notes along",
+    "subtitle": "A photo, a PDF, or a document works beautifully.",
+    "uploadTab": "Upload or take a photo",
+    "pasteTab": "Paste text instead",
+    "pasteLabel": "Paste your study notes",
+    "pastePlaceholder": "Paste the lesson, notes, or chapter you want to practise…",
+    "pasteHint": "At least 50 characters, up to 24,000.",
+    "selectedFiles": "Selected files",
+    "removeFile": "Remove {name}",
+    "studySubject": "Subject of the material",
+    "chooseSubject": "Choose a subject",
+    "otherSubject": "Name the subject"
   },
   "quizOptions": {
     "title": "Customize Your Quiz",
@@ -56,12 +115,28 @@
     "exerciseStyle": "Exercise Style",
     "difficulty": "Difficulty",
     "back": "Back",
-    "generate": "Generate Quiz"
+    "generate": "Generate Quiz",
+    "learnerStep": "STEP 02 · THE LEARNER",
+    "studentTitle": "Who's the student?",
+    "studentDescription": "A little context helps us write questions at the right level.",
+    "age": "Age",
+    "agePlaceholder": "e.g. 12",
+    "schoolType": "School type",
+    "chooseSchoolType": "Choose a school type",
+    "year": "Year at this school",
+    "chooseYear": "Choose a year",
+    "yearValue": "Year {year}",
+    "subjectSummary": "Selected subject"
   },
   "quizDisplay": {
     "description": "Answer the following questions to the best of your ability.",
     "placeholder": "Your answer here...",
-    "allAnswered": "Please answer all questions before submitting."
+    "allAnswered": "Please answer all questions before submitting.",
+    "true": "True",
+    "false": "False",
+    "questionOf": "Question {current} of {total}",
+    "previous": "Previous",
+    "next": "Next question"
   },
   "quizResults": {
     "title": "Quiz Results",
@@ -71,15 +146,16 @@
     "correctAnswer": "Correct Answer:",
     "explanation": "Explanation:",
     "noAnswer": "No Answer",
-    "generateNew": "Generate New Quiz"
+    "generateNew": "Generate New Quiz",
+    "openReview": "Review your answers with the model answers below. Open responses are not scored automatically."
   },
   "languageSelector": {
     "label": "UI Language"
   },
   "enums": {
     "subjectType": {
-      "Text": "Text",
-      "Math": "Math"
+      "Text": "Reading & concepts",
+      "Math": "Math exercises"
     },
     "quizType": {
       "MultipleChoice": "Multiple Choice",
@@ -95,5 +171,64 @@
       "Medium": "Medium",
       "Hard": "Hard"
     }
+  },
+  "schoolTypes": {
+    "primary": "Primary school",
+    "middle": "Middle school",
+    "high": "High school",
+    "college": "College / university"
+  },
+  "subjectGroups": {
+    "languages": "Languages & reading",
+    "science": "Science & technology",
+    "math": "Mathematics",
+    "humanities": "People & society",
+    "otherGroup": "Other subjects"
+  },
+  "subjects": {
+    "languageArts": "Language arts",
+    "english": "English",
+    "dutch": "Dutch",
+    "italian": "Italian",
+    "foreignLanguages": "Foreign languages",
+    "literature": "Literature",
+    "biology": "Biology",
+    "chemistry": "Chemistry",
+    "physics": "Physics",
+    "generalScience": "General science",
+    "earthScience": "Earth science",
+    "computerScience": "Computer science",
+    "mathematics": "Mathematics",
+    "statistics": "Statistics",
+    "history": "History",
+    "geography": "Geography",
+    "civics": "Civics",
+    "economics": "Economics",
+    "philosophy": "Philosophy",
+    "religion": "Religion",
+    "business": "Business studies",
+    "art": "Art",
+    "music": "Music",
+    "health": "Health education",
+    "other": "Other"
+  },
+  "generationErrors": {
+    "title": "Quiz generation did not finish",
+    "details": "What happened?",
+    "reference": "Reference ID",
+    "noFallback": "OpenRouter fallback is not configured for this deployment.",
+    "credits_exhausted": "The AI provider has insufficient credits. Please check its balance or configure the fallback.",
+    "rate_limited": "The AI provider is handling too many requests. Please try again shortly.",
+    "authentication": "The AI provider rejected its configured API key. The app owner should check the server settings.",
+    "request_rejected": "The AI provider rejected this request. The app owner should check the model configuration.",
+    "timeout": "The AI provider took too long to respond. Please try again.",
+    "provider_unavailable": "The AI provider is temporarily unavailable. Please try again.",
+    "network": "The quiz server could not reach the AI provider. Please try again.",
+    "invalid_response": "The AI returned a quiz that did not pass validation. Try again or choose fewer questions.",
+    "output_truncated": "The AI response was incomplete. Try fewer questions.",
+    "providers_failed": "The AI providers failed for different reasons. Open the details below.",
+    "not_configured": "Quiz generation has no AI provider configured. The app owner should add a provider key.",
+    "invalid_server_response": "The quiz server returned an unreadable response. Please try again.",
+    "unknown": "Quiz generation failed unexpectedly. Please try again."
   }
 }

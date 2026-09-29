@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Quiz, Question, QuizType, SubjectType } from '../types';
 import MathText from './MathText';
 import { useI18n } from '../context/i18n';
@@ -13,6 +13,7 @@ interface QuizDisplayProps {
 
 export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, setUserAnswers, onSubmit, subjectType }) => {
   const { t } = useI18n();
+  const [current, setCurrent] = useState(0);
 
   const isTrueFalseQuestion = (question: Question) => {
     const normalizedType = typeof question.type === 'string' ? question.type.toLowerCase().replace(/[-_\s]/g, '') : '';
@@ -47,6 +48,25 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
     }
   }, [quiz, subjectType]);
 
+  const allQuestionsAnswered = quiz.questions.every((_, index) => Boolean(userAnswers[index]?.trim()));
+
+  useEffect(() => {
+    const advanceOnEnter = (event: KeyboardEvent) => {
+      if (event.key !== 'Enter' || event.repeat || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      const target = event.target as HTMLElement | null;
+      if (target?.closest('textarea, [contenteditable="true"]')) return;
+      if (target?.closest('button, select, input:not([type="radio"])')) return;
+      if (!userAnswers[current]?.trim()) return;
+      event.preventDefault();
+      if (current < quiz.questions.length - 1) {
+        setCurrent(current + 1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (allQuestionsAnswered) onSubmit();
+    };
+    window.addEventListener('keydown', advanceOnEnter);
+    return () => window.removeEventListener('keydown', advanceOnEnter);
+  }, [current, quiz.questions.length, userAnswers, allQuestionsAnswered, onSubmit]);
+
   const handleAnswerChange = (questionIndex: number, answer: string) => {
     setUserAnswers((prev) => ({
       ...prev,
@@ -60,7 +80,7 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
     const trueFalseOptions = ['True', 'False'];
 
     return (
-      <div key={index} className="mb-8 p-6 bg-white dark:bg-slate-800 rounded-xl shadow-md border border-slate-200 dark:border-slate-700">
+      <div key={index} className="mb-8 p-6 bg-white dark:bg-slate-800 rounded-3xl shadow-lg border border-violet-100 dark:border-slate-700">
         <div className="flex items-start">
           <span className="font-bold text-indigo-500 mr-3">{index + 1}.</span>
           <div className="flex-1">
@@ -78,7 +98,7 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
                       value={option}
                       checked={userAnswer === option}
                       onChange={() => handleAnswerChange(index, option)}
-                      className="h-4 w-4 text-indigo-600 border-slate-300 focus:ring-indigo-500"
+                      className="quiz-radio"
                     />
                     <span className="ml-3 text-slate-700 dark:text-slate-300">
                       {subjectType === SubjectType.Math ? <MathText text={option} /> : option}
@@ -98,9 +118,9 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
                       value={option}
                       checked={userAnswer === option}
                       onChange={() => handleAnswerChange(index, option)}
-                      className="h-4 w-4 text-indigo-600 border-slate-300 focus:ring-indigo-500"
+                      className="quiz-radio"
                     />
-                    <span className="ml-3 text-slate-700 dark:text-slate-300">{option}</span>
+                    <span className="ml-3 text-slate-700 dark:text-slate-300">{t(`quizDisplay.${option.toLowerCase()}`)}</span>
                   </label>
                 ))}
               </div>
@@ -121,8 +141,6 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
     );
   };
   
-  const allQuestionsAnswered = Object.keys(userAnswers).length === quiz.questions.length && Object.values(userAnswers).every(ans => typeof ans === 'string' && ans.trim() !== '');
-
   return (
     <div className="w-full max-w-3xl mx-auto" id="quiz-display">
       <h2 className="text-3xl font-bold text-center mb-2 text-slate-800 dark:text-slate-200">{quiz.title}</h2>
@@ -130,18 +148,11 @@ export const QuizDisplay: React.FC<QuizDisplayProps> = ({ quiz, userAnswers, set
         {t('quizDisplay.description')}
       </p>
 
-      <div>{quiz.questions.map(renderQuestion)}</div>
+      <div className="question-progress"><span>{t('quizDisplay.questionOf', {current: current + 1, total: quiz.questions.length})}</span><span>{Math.round(((current + 1) / quiz.questions.length) * 100)}%</span></div><div className="progress-track"><span style={{width: `${((current + 1) / quiz.questions.length) * 100}%`}} /></div>
+      <div>{renderQuestion(quiz.questions[current], current)}</div>
 
-      <div className="mt-8 text-center">
-        <button
-          onClick={onSubmit}
-          disabled={!allQuestionsAnswered}
-          className="w-full sm:w-auto px-12 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed"
-        >
-          {t('app.submit')}
-        </button>
-        {!allQuestionsAnswered && <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{t('quizDisplay.allAnswered')}</p>}
-      </div>
+      <div className="quiz-navigation"><button type="button" className="secondary-button" onClick={() => { setCurrent(c => Math.max(0,c-1)); window.scrollTo({top:0,behavior:'smooth'}); }} disabled={current === 0}>{t('quizDisplay.previous')}</button>{current < quiz.questions.length - 1 ? <button type="button" className="primary-button" onClick={() => { setCurrent(c => c+1); window.scrollTo({top:0,behavior:'smooth'}); }} disabled={!userAnswers[current]?.trim()}>{t('quizDisplay.next')} →</button> : <button type="button" className="primary-button" onClick={onSubmit} disabled={!allQuestionsAnswered}>{t('app.submit')} →</button>}</div>
+      {current === quiz.questions.length - 1 && !allQuestionsAnswered && <p className="answer-hint">{t('quizDisplay.allAnswered')}</p>}
     </div>
   );
 };

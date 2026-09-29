@@ -5,7 +5,44 @@
     "errorTitle": "Si è verificato un errore",
     "errorGeneric": "Qualcosa è andato storto.",
     "startOver": "Ricomincia",
-    "submit": "Invia Quiz"
+    "submit": "Invia Quiz",
+    "modeLabel": "Scegli come usare il quiz",
+    "studentMode": "Sto studiando",
+    "parentMode": "Aiuto un bambino",
+    "studentDescription": "Esercitati in autonomia e impara da ogni risposta.",
+    "parentDescription": "Trasforma il materiale di studio in domande da discutere insieme.",
+    "howItWorks": "Tre semplici passaggi",
+    "uploadStep": "Aggiungi il materiale di studio",
+    "extractStep": "Leggiamo il contenuto",
+    "quizStep": "Esercitati con un quiz",
+    "theme": "Tema",
+    "theme_system": "Sistema",
+    "theme_light": "Chiaro",
+    "theme_dark": "Scuro",
+    "accessPrompt": "Inserisci il codice di accesso per iniziare.",
+    "accessLabel": "Codice di accesso",
+    "continue": "Continua",
+    "invalidAccess": "Il codice non è corretto. Riprova.",
+    "accessUnavailable": "L’accesso non è temporaneamente disponibile. Riprova più tardi.",
+    "eyebrow": "IL TUO COMPAGNO DI STUDIO",
+    "heroTitle": "Dagli appunti a “ce la posso fare.”",
+    "heroCopy": "Carica gli appunti, esercitati con un quiz su misura e impara da ogni risposta. Per studenti e genitori che li aiutano.",
+    "addNotes": "Aggiungi materiale",
+    "takeQuiz": "Esercitati",
+    "learnWhy": "Capisci perché",
+    "sampleLabel": "UN PICCOLO ESEMPIO",
+    "sampleQuestion": "Cosa ti aiuta a ricordare ciò che hai studiato?",
+    "sampleAnswerA": "Rileggere ancora",
+    "sampleAnswerB": "Provare a ricordarlo",
+    "readyTitle": "Pronto a provare?",
+    "accessNote": "Il codice di accesso apre l’anteprima.",
+    "switchLight": "Passa al tema chiaro",
+    "switchDark": "Passa al tema scuro",
+    "progressLabel": "Avanzamento del quiz",
+    "setUp": "Prepara",
+    "review": "Rivedi",
+    "workspaceTitle": "Cosa impariamo oggi?",
+    "workspaceCopy": "Inizia con una foto o un documento di studio. Ne creeremo un quiz."
   },
   "loading": {
     "thinking": "L'IA sta pensando...",
@@ -17,7 +54,11 @@
     "crafting": "Creazione di domande pertinenti...",
     "developing": "Sviluppo delle chiavi di risposta...",
     "assembling": "Assemblaggio del tuo quiz...",
-    "quizGenerated": "Quiz generato!"
+    "quizGenerated": "Quiz generato!",
+    "processingImage": "Elaborazione immagine {current} di {total}…",
+    "processingPage": "Elaborazione pagina {current} di {total}…",
+    "processingDocument": "Elaborazione documento…",
+    "mightTakeMinute": "Potrebbe volerci un minuto."
   },
   "errors": {
     "unknownExtraction": "Si è verificato un errore sconosciuto durante l'estrazione del testo.",
@@ -29,14 +70,19 @@
     "tooManyImages": "Puoi caricare fino a 5 immagini alla volta.",
     "tooManyDocuments": "È possibile caricare un solo documento (PDF o DOCX) alla volta.",
     "singleDocumentOnly": "Un PDF o DOCX deve essere caricato da solo, senza altri file.",
-    "pdfPageLimit": "I PDF sono limitati a 15 pagine. Carica un documento più corto."
+    "pdfPageLimit": "I PDF sono limitati a 15 pagine. Carica un documento più corto.",
+    "tooLittleText": "Non siamo riusciti a leggere abbastanza testo. Prova un’immagine più nitida o un documento con testo selezionabile.",
+    "tooMuchText": "Il materiale è troppo lungo. Prova un documento più breve o meno immagini.",
+    "lowQualityImage": "La foto è troppo sfocata o contiene troppo poco testo leggibile. Carica una foto più nitida con tutta la pagina a fuoco.",
+    "lowQualityImageNumber": "L’immagine {number} è troppo sfocata o contiene troppo poco testo leggibile. Sostituiscila con una foto più nitida.",
+    "photoHelpTitle": "Controlla il materiale"
   },
   "fileUpload": {
     "renderingPdf": "Rendering anteprima PDF...",
     "clickToUpload": "Clicca per caricare",
     "dragAndDrop": "o trascina e rilascia",
     "fileTypes": "Fino a 5 immagini oppure un PDF/DOCX (max 15 pagine)",
-    "subjectType": "Tipo di materia",
+    "subjectType": "Tipo di esercizio",
     "documentLanguage": "Lingua del documento",
     "extractText": "Estrai testo",
     "analyzeMaterial": "Analizza materiale",
@@ -44,7 +90,20 @@
     "cameraDescription": "Scatta una nuova immagine con la fotocamera del tuo telefono o tablet.",
     "multipleCount": "+{count}",
     "multipleFiles": "{count} file selezionati",
-    "docxReady": "DOCX selezionato e pronto"
+    "docxReady": "DOCX selezionato e pronto",
+    "yourMaterial": "PASSO 01 · IL MATERIALE",
+    "title": "Porta i tuoi appunti",
+    "subtitle": "Una foto, un PDF o un documento vanno benissimo.",
+    "uploadTab": "Carica o scatta una foto",
+    "pasteTab": "Incolla testo",
+    "pasteLabel": "Incolla gli appunti",
+    "pastePlaceholder": "Incolla qui la lezione, gli appunti o il capitolo…",
+    "pasteHint": "Da 50 a 24.000 caratteri.",
+    "selectedFiles": "File selezionati",
+    "removeFile": "Rimuovi {name}",
+    "studySubject": "Materia del contenuto",
+    "chooseSubject": "Scegli una materia",
+    "otherSubject": "Nome della materia"
   },
   "quizOptions": {
     "title": "Personalizza il tuo quiz",
@@ -56,12 +115,28 @@
     "exerciseStyle": "Stile degli esercizi",
     "difficulty": "Difficoltà",
     "back": "Indietro",
-    "generate": "Genera Quiz"
+    "generate": "Genera Quiz",
+    "learnerStep": "PASSO 02 · LO STUDENTE",
+    "studentTitle": "Per chi è il quiz?",
+    "studentDescription": "Queste informazioni ci aiutano a creare domande del livello giusto.",
+    "age": "Età",
+    "agePlaceholder": "es. 12",
+    "schoolType": "Tipo di scuola",
+    "chooseSchoolType": "Scegli la scuola",
+    "year": "Anno in questa scuola",
+    "chooseYear": "Scegli un anno",
+    "yearValue": "Anno {year}",
+    "subjectSummary": "Materia scelta"
   },
   "quizDisplay": {
     "description": "Rispondi alle seguenti domande al meglio delle tue capacità.",
     "placeholder": "La tua risposta qui...",
-    "allAnswered": "Per favore, rispondi a tutte le domande prima di inviare."
+    "allAnswered": "Per favore, rispondi a tutte le domande prima di inviare.",
+    "true": "Vero",
+    "false": "Falso",
+    "questionOf": "Domanda {current} di {total}",
+    "previous": "Precedente",
+    "next": "Prossima domanda"
   },
   "quizResults": {
     "title": "Risultati del Quiz",
@@ -71,15 +146,16 @@
     "correctAnswer": "Risposta corretta:",
     "explanation": "Spiegazione:",
     "noAnswer": "Nessuna risposta",
-    "generateNew": "Genera nuovo quiz"
+    "generateNew": "Genera nuovo quiz",
+    "openReview": "Confronta le tue risposte con quelle suggerite qui sotto. Le risposte aperte non vengono valutate automaticamente."
   },
   "languageSelector": {
     "label": "Lingua UI"
   },
   "enums": {
     "subjectType": {
-      "Text": "Testo",
-      "Math": "Matematica"
+      "Text": "Lettura e concetti",
+      "Math": "Esercizi di matematica"
     },
     "quizType": {
       "MultipleChoice": "Scelta Multipla",
@@ -95,5 +171,64 @@
       "Medium": "Medio",
       "Hard": "Difficile"
     }
+  },
+  "schoolTypes": {
+    "primary": "Scuola primaria",
+    "middle": "Scuola media",
+    "high": "Scuola superiore",
+    "college": "Università"
+  },
+  "subjectGroups": {
+    "languages": "Lingue e lettura",
+    "science": "Scienze e tecnologia",
+    "math": "Matematica",
+    "humanities": "Persone e società",
+    "otherGroup": "Altre materie"
+  },
+  "subjects": {
+    "languageArts": "Lingua",
+    "english": "Inglese",
+    "dutch": "Olandese",
+    "italian": "Italiano",
+    "foreignLanguages": "Lingue straniere",
+    "literature": "Letteratura",
+    "biology": "Biologia",
+    "chemistry": "Chimica",
+    "physics": "Fisica",
+    "generalScience": "Scienze generali",
+    "earthScience": "Scienze della Terra",
+    "computerScience": "Informatica",
+    "mathematics": "Matematica",
+    "statistics": "Statistica",
+    "history": "Storia",
+    "geography": "Geografia",
+    "civics": "Educazione civica",
+    "economics": "Economia",
+    "philosophy": "Filosofia",
+    "religion": "Religione",
+    "business": "Economia aziendale",
+    "art": "Arte",
+    "music": "Musica",
+    "health": "Educazione alla salute",
+    "other": "Altro"
+  },
+  "generationErrors": {
+    "title": "Impossibile completare il quiz",
+    "details": "Che cosa è successo?",
+    "reference": "ID di riferimento",
+    "noFallback": "Il servizio alternativo OpenRouter non è configurato per questa versione.",
+    "credits_exhausted": "Il credito del servizio AI è esaurito. Controlla il saldo o configura il servizio alternativo.",
+    "rate_limited": "Il servizio AI riceve troppe richieste. Riprova tra poco.",
+    "authentication": "Il servizio AI ha rifiutato la chiave API. Il gestore deve controllare le impostazioni del server.",
+    "request_rejected": "Il servizio AI ha rifiutato la richiesta. Il gestore deve controllare la configurazione del modello.",
+    "timeout": "Il servizio AI ha impiegato troppo tempo a rispondere. Riprova.",
+    "provider_unavailable": "Il servizio AI è temporaneamente non disponibile. Riprova.",
+    "network": "Il server del quiz non riesce a raggiungere il servizio AI. Riprova.",
+    "invalid_response": "L’AI ha creato un quiz che non ha superato la verifica. Riprova o scegli meno domande.",
+    "output_truncated": "La risposta dell’AI è incompleta. Scegli meno domande.",
+    "providers_failed": "I servizi AI hanno fallito per motivi diversi. Apri i dettagli qui sotto.",
+    "not_configured": "Nessun servizio AI è configurato per i quiz. Il gestore deve aggiungere una chiave.",
+    "invalid_server_response": "Il server del quiz ha restituito una risposta illeggibile. Riprova.",
+    "unknown": "La generazione del quiz è fallita inaspettatamente. Riprova."
   }
 }
